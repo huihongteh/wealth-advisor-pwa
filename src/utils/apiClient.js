@@ -27,8 +27,10 @@ const apiClient = async (endpoint, method = 'GET', body = null) => {
     }
 
     try {
-        console.log(`API Request: ${method} ${API_BASE_URL}${endpoint}`); // Log request
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+        const fullUrl = `${API_BASE_URL}${endpoint}`;
+        console.log(`API Request: ${method} ${fullUrl}`); // Log the full URL being requested
+
+        const response = await fetch(fullUrl, config); // <-- Use fullUrl here
 
         // Handle No Content response (e.g., for DELETE)
         if (response.status === 204) {
