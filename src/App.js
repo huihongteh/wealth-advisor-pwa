@@ -1,70 +1,94 @@
 // src/App.js
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link,
+  Navigate
+} from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
 import './App.css';
 
-// Import our page components
+// Page Components
 import LoginPage from './pages/LoginPage';
-import DashboardPage from './pages/DashboardPage';
 import ClientListPage from './pages/ClientListPage';
+import AddClientPage from './pages/AddClientPage';
 import ClientDetailPage from './pages/ClientDetailPage';
 import AddNotePage from './pages/AddNotePage';
 import ViewNotePage from './pages/ViewNotePage';
-import AddClientPage from './pages/AddClientPage';
+import EditNotePage from './pages/EditNotePage'; // Existing Edit Note Page
+import EditClientPage from './pages/EditClientPage'; // <-- Import New Edit Client Page
+
+// Components
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
-  // Basic check for authentication (VERY simplified - replace later!)
-  const isAuthenticated = false; // Hardcoded for now!
+  const auth = useAuth();
 
   return (
     <Router>
       <div className="App">
-        {/* Optional: Basic Nav Links for testing - remove later */}
-        <nav style={{ marginBottom: '20px', borderBottom: '1px solid #ccc', paddingBottom: '10px' }}>
-          {!isAuthenticated && <Link to="/login" style={{ marginRight: '10px' }}>Login</Link>}
-          {isAuthenticated && (
-            <>
-              <Link to="/" style={{ marginRight: '10px' }}>Dashboard</Link>
-              <Link to="/clients" style={{ marginRight: '10px' }}>Clients</Link>
-              {/* Add other links as needed */}
-              <button onClick={() => alert('Logout logic needed!')}>Logout</button>
-            </>
-          )}
+        {/* --- Nav Bar --- */}
+        <nav style={{ /* ... styles ... */ }}>
+           {/* ... nav links ... */}
+            <div>
+                {auth.isAuthenticated && (
+                <>
+                    <Link to="/" style={{ marginRight: '15px', textDecoration: 'none', color: '#007bff' }}>Clients</Link>
+                </>
+                )}
+            </div>
+            <div>
+                {!auth.isAuthenticated ? (
+                <Link to="/login" style={{ textDecoration: 'none', color: '#007bff' }}>Login</Link>
+                ) : (
+                <>
+                    <button onClick={auth.logout} style={{ cursor: 'pointer' }}>Logout</button>
+                </>
+                )}
+            </div>
         </nav>
 
         <h1>Wealth Advisor Notes PWA</h1>
 
-        {/* Define the routes */}
+        {/* --- Updated Routes --- */}
         <Routes>
-          {/* If authenticated, show dashboard, otherwise redirect to login (logic needs refinement) */}
-          {isAuthenticated ? (
-            <>
-              <Route path="/" element={<DashboardPage />} />
-              <Route path="/clients" element={<ClientListPage />} />
-              {/* Route for adding a client */}
-              <Route path="/add-client" element={<AddClientPage />} />
-              {/* Route for specific client detail - :clientId is a URL parameter */}
-              <Route path="/client/:clientId" element={<ClientDetailPage />} />
-              {/* Route for adding a note FOR a specific client */}
-              <Route path="/client/:clientId/add-note" element={<AddNotePage />} />
-              {/* Route for viewing a specific note - needs client and note IDs */}
-              <Route path="/client/:clientId/note/:noteId" element={<ViewNotePage />} />
-              {/* Add other authenticated routes here */}
+          {/* --- Public Route --- */}
+          <Route
+            path="/login"
+            element={!auth.isAuthenticated ? <LoginPage /> : <Navigate to="/" replace />}
+          />
 
-               {/* Redirect to dashboard if authenticated and trying to access login */}
-              <Route path="/login" element={<DashboardPage />} /> {/* Or redirect component */}
+          {/* --- Protected Routes --- */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/" element={<ClientListPage />} />
+            <Route path="/clients" element={<ClientListPage />} />
+            <Route path="/add-client" element={<AddClientPage />} />
+            <Route path="/client/:clientId" element={<ClientDetailPage />} />
 
-            </>
-          ) : (
-             <>
-                {/* Only allow access to login page if not authenticated */}
-                <Route path="/login" element={<LoginPage />} />
-                {/* Any other route redirects to login if not authenticated */}
-                <Route path="*" element={<LoginPage />} /> {/* Or a dedicated Redirect component */}
-             </>
-          )}
-            {/* Fallback for unmatched routes if needed, though the above covers most cases */}
-             {/* <Route path="*" element={<div>404 Not Found</div>} /> */}
+            {/* --- ADD EDIT CLIENT ROUTE --- */}
+            <Route
+              path="/client/:clientId/edit" // New Path
+              element={<EditClientPage />}   // New Component
+            />
+            {/* --- END EDIT CLIENT ROUTE --- */}
+
+            <Route path="/client/:clientId/add-note" element={<AddNotePage />} />
+            <Route path="/client/:clientId/note/:noteId" element={<ViewNotePage />} />
+            <Route path="/client/:clientId/note/:noteId/edit" element={<EditNotePage />} />
+          </Route>
+
+          {/* --- Catch-all Route --- */}
+           <Route
+             path="*"
+             element={
+                auth.isAuthenticated
+                ? <div style={{ textAlign: 'center', marginTop: '50px' }}><h2>404 - Page Not Found</h2><Link to="/">Go Home</Link></div>
+                : <Navigate to="/login" replace />
+             }
+           />
+
         </Routes>
       </div>
     </Router>

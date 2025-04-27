@@ -1,0 +1,102 @@
+/* src/pages/AddNotePage.module.css */
+
+.addNotePage {
+  max-width: 700px;
+  margin: 0 auto 20px auto;
+  padding: 0 20px 20px 20px;
+}
+
+/* Header Styles */
+.addNotePage h2 {
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-top: 15px;
+  margin-bottom: 10px;
+  color: #1c1e21;
+}
+.clientContext {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 1rem;
+    color: #657786;
+}
+
+/* Form Styles */
+.noteForm {
+  display: flex;
+  flex-direction: column;
+}
+.formGroup {
+  margin-bottom: 20px;
+}
+.formGroup label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: #555;
+}
+.formGroup input[type="date"],
+.formGroup textarea {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+  font-size: 1rem;
+  font-family: inherit;
+  background-color: #f8f9fa;
+}
+.formGroup textarea {
+    line-height: 1.5;
+}
+.formGroup input:focus,
+.formGroup textarea:focus {
+  border-color: #007bff;
+  background-color: #ffffff;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+}
+
+/* Error Message */
+.errorMessage {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    padding: 10px 15px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 0.9em;
+}
+
+/* Form Actions */
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 15px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+.button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px; /* Consistent radius */
+  font-size: 1rem;
+  font-weight: 600; /* Bold */
+  cursor: pointer;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+.saveButton {
+  background-color: #28a745; /* Green for Add */
+  color: white;
+}
+.saveButton:hover:not(:disabled) {
+  background-color: #218838;
+}
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

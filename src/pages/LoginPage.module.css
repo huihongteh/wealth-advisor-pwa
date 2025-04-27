@@ -1,0 +1,102 @@
+/* src/pages/LoginPage.module.css */
+
+.loginContainer {
+  max-width: 400px;
+  margin: 60px auto; /* Increased top margin */
+  padding: 30px 25px; /* Adjusted padding */
+  /* Consider removing border/box-shadow for a flatter look if preferred */
+  /* border: 1px solid #e0e0e0; */
+  /* box-shadow: none; */
+  border-radius: 8px; /* Keep radius */
+  background-color: #ffffff; /* Ensure background if needed */
+}
+
+.loginContainer h2 {
+  text-align: center;
+  font-size: 1.8rem; /* Slightly larger */
+  font-weight: 600; /* Medium weight */
+  margin-bottom: 30px; /* More space below heading */
+  color: #1c1e21; /* Darker text */
+}
+
+.loginForm {
+  display: flex;
+  flex-direction: column;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 6px; /* Slightly less space */
+  font-weight: 500; /* Medium weight */
+  font-size: 0.95rem; /* Standard label size */
+  color: #555;
+}
+
+.formGroup input {
+  width: 100%;
+  padding: 12px 15px; /* Increased padding */
+  border: 1px solid #ccc; /* Keep border for inputs */
+  border-radius: 6px; /* Slightly less round */
+  box-sizing: border-box;
+  font-size: 1rem;
+  background-color: #f8f9fa; /* Light background */
+}
+
+.formGroup input:focus {
+  border-color: #007bff;
+  background-color: #ffffff; /* White on focus */
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2); /* Subtle focus ring */
+}
+
+.loginButton {
+  padding: 12px 15px;
+  background-color: #007bff; /* Keep primary blue */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600; /* Bold */
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: 15px;
+}
+.loginButton:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+.loginButton:disabled {
+  background-color: #adb5bd; /* Grey disabled */
+  cursor: not-allowed;
+}
+
+.errorMessage {
+    /* Keep existing error style */
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    padding: 10px 15px;
+    margin-bottom: 20px; /* Space below error */
+    text-align: center;
+    font-size: 0.9em;
+}
+
+/* Optional Forgot Password - keep consistent link style */
+  .forgotPassword {
+    text-align: center;
+    margin-top: 15px;
+  }
+  
+  .forgotPassword a {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 0.9em;
+  }
+  
+  .forgotPassword a:hover {
+    text-decoration: underline;
+  }

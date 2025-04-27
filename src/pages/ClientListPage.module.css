@@ -1,0 +1,167 @@
+/* src/pages/ClientListPage.module.css */
+
+/* Container for the whole page, minimal padding */
+.clientListPageContainer {
+  /* No max-width or centering needed if header/search are full width */
+  padding-bottom: 20px; /* Space at the bottom */
+}
+
+/* New Header Styles */
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px; /* Standard padding */
+  /* background-color: #f8f9fa; Optional background */
+  /* border-bottom: 1px solid #eee; Optional border */
+}
+
+.pageTitle {
+  font-size: 2.2rem; /* Large like WhatsApp */
+  font-weight: 700;
+  margin: 0; /* Remove default margins */
+  color: #1c1e21; /* Darker text color */
+}
+
+.addButtonTopRight {
+  background-color: #007bff; /* iOS blue or WhatsApp green #25D366 */
+  color: white;
+  border: none;
+  width: 36px; /* Adjust size */
+  height: 36px; /* Adjust size */
+  border-radius: 50%; /* Circular */
+  font-size: 1.8rem; /* Size of '+' */
+  font-weight: 300; /* Lighter weight for '+' */
+  line-height: 34px; /* Center '+' vertically */
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  padding: 0; /* Remove padding if using line-height */
+}
+.addButtonTopRight:hover {
+  background-color: #0056b3; /* Darker blue or green #128C7E */
+}
+
+/* New Search Bar Styles */
+.searchContainer {
+  padding: 5px 15px 10px 15px; /* Padding around search bar */
+}
+
+.searchInput {
+  width: 100%;
+  padding: 8px 15px 8px 35px; /* Left padding for icon */
+  font-size: 1rem;
+  border-radius: 10px; /* Less rounded than full pill */
+  border: none; /* Remove border */
+  background-color: #f0f2f5; /* Light grey background like WhatsApp */
+  color: #1c1e21;
+  box-sizing: border-box;
+  /* Placeholder Icon (using background image) */
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%238e8e93" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>'); /* Grey search icon SVG */
+  background-repeat: no-repeat;
+  background-position: 10px center; /* Position icon left */
+  background-size: 16px 16px; /* Icon size */
+}
+.searchInput::placeholder {
+  color: #8e8e93; /* Grey placeholder text */
+  /* text-align: center; /* Centering placeholder can be tricky */
+}
+.searchInput:focus {
+  outline: none; /* Remove focus outline */
+  background-color: #e8eaed; /* Slightly darker on focus */
+}
+
+
+/* Success Message Style - position below search bar */
+.successMessage {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+  padding: 10px 15px; /* Slightly less padding */
+  margin: 5px 15px 10px 15px; /* Margins */
+  border-radius: 4px;
+  text-align: center;
+  font-size: 0.9em;
+}
+
+
+/* --- REMOVED Styles --- */
+/* .actionBar, .filterGroup, .filterLabel, .dateInput, .advancedFilterToggle, .arrowIcon, .clearButton, .advancedFiltersContainer, .visible, .hidden */
+
+
+/* Client List Styles */
+.clientList {
+list-style: none;
+padding: 0;
+margin: 10px 0 0 0; /* Add margin top */
+}
+.clientListItem {
+/* Remove border, use separator line */
+margin: 0; /* Remove margin */
+transition: background-color 0.2s ease;
+}
+.clientListItem:hover {
+background-color: #f0f2f5; /* Subtle hover */
+}
+
+.clientLink {
+  display: flex;
+  align-items: center; /* Vertically center avatar and text */
+  padding: 10px 20px; /* Adjust padding */
+  text-decoration: none;
+  color: inherit;
+  gap: 15px; /* Space between avatar and text */
+  /* Add separator line */
+  border-bottom: 1px solid #f0f2f5; /* Light separator */
+}
+.clientListItem:last-child .clientLink {
+  border-bottom: none; /* No border for last item */
+}
+
+/* --- NEW Avatar Placeholder --- */
+.avatarPlaceholder {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #dfe5e7; /* Placeholder color */
+  flex-shrink: 0; /* Prevent shrinking */
+  /* Add display flex, align-items, justify-content and icon inside later */
+}
+
+/* Container for Name and Last Contact */
+.clientInfo {
+  display: flex;
+  flex-direction: column; /* Stack name and subtext */
+  flex-grow: 1; /* Take remaining space */
+  overflow: hidden; /* Prevent long text overflow */
+}
+
+.clientName {
+font-weight: 500; /* Medium weight */
+font-size: 1.1rem;
+color: #1c1e21; /* Dark text */
+white-space: nowrap; /* Prevent name wrapping */
+overflow: hidden;
+text-overflow: ellipsis; /* Add ellipsis for long names */
+}
+
+.lastContact {
+font-size: 0.9em; /* Smaller subtext */
+color: #657786; /* Grey subtext color */
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+margin-top: 2px; /* Small space below name */
+}
+
+/* Style for filter message */
+.noResults {
+  text-align: center;
+  color: #666;
+  margin-top: 30px;
+  padding: 20px;
+  font-style: italic;
+}
+
+/* --- REMOVED Styles --- */
+/* .lastContact styles involving display:block, flex-shrink, etc. might be adjusted or removed depending on new layout */

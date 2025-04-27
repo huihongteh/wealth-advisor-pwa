@@ -1,0 +1,33 @@
+/* src/components/BackButton.module.css */
+.backButton {
+    display: inline-flex; /* Align icon and text */
+    align-items: center;
+    text-decoration: none;
+    color: #007aff; /* Standard iOS blue */
+    font-size: 1rem; /* Approx 16-17px */
+    padding: 8px 0px 8px 0px; /* Vertical padding, no horizontal on container */
+    /* margin-left: -8px; /* Negative margin to align chevron visually to edge */
+    cursor: pointer;
+    background: none;
+    border: none;
+    transition: opacity 0.2s ease;
+    -webkit-tap-highlight-color: rgba(0,0,0,0); /* Remove tap highlight */
+    line-height: 1.2; /* Adjust line height */
+  }
+  
+  .backButton:hover {
+    opacity: 0.7; /* Slight fade on hover */
+  }
+  
+  .icon {
+    display: inline-block;
+    /* Chevron size is controlled by SVG width/height */
+    margin-right: 6px; /* Space between icon and text */
+    /* Vertically align icon slightly better if needed */
+     position: relative;
+     top: 1px;
+  }
+  
+  .label {
+    font-weight: 400; /* Regular weight */
+  }
