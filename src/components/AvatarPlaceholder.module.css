@@ -1,0 +1,14 @@
+/* src/components/AvatarPlaceholder.module.css */
+.avatarPlaceholder {
+    display: inline-flex; /* Use flex for centering if needed, but line-height often works */
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%; /* Circular */
+    color: white; /* Letter color */
+    text-align: center;
+    font-weight: 500; /* Medium weight */
+    text-transform: uppercase; /* Ensure letter is uppercase */
+    user-select: none; /* Prevent text selection */
+    flex-shrink: 0; /* Prevent shrinking in flex layouts */
+    /* Size, background-color, font-size, line-height set via inline styles */
+  }

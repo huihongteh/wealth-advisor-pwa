@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import styles from './ClientListPage.module.css'; // Import CSS module
 import Spinner from '../components/Spinner'; // Import Spinner component
+import AvatarPlaceholder from '../components/AvatarPlaceholder';
 
 // --- Dummy Data ---
 const DUMMY_CLIENTS = [
@@ -66,28 +67,23 @@ function ClientListPage() {
 
   // --- Render Logic ---
   return (
-    // Use a container div that doesn't have excessive padding if header/search are full-width
+    // Main container needs layout adjustments via CSS
     <div className={styles.clientListPageContainer}>
 
-        {/* --- NEW Header Area --- */}
+        {/* --- Fixed Header Area --- */}
         <div className={styles.pageHeader}>
-            <h1 className={styles.pageTitle}>Clients</h1> {/* Changed h2 to h1 for semantic correctness */}
-            <button
-                onClick={handleAddClient}
-                className={styles.addButtonTopRight}
-                aria-label="Add New Client"
-            >
+            <h1 className={styles.pageTitle}>Clients</h1>
+            <button onClick={handleAddClient} className={styles.addButtonTopRight} aria-label="Add New Client">
                 +
             </button>
         </div>
         {/* --- End Header Area --- */}
 
-        {/* --- NEW Search Bar Area --- */}
+        {/* --- Fixed Search Bar Area --- */}
         <div className={styles.searchContainer}>
-             {/* Optional: Add icon inside or as background */}
              <input
                 type="text"
-                placeholder="Search" // Simplified placeholder
+                placeholder="Search"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={styles.searchInput}
@@ -95,46 +91,46 @@ function ClientListPage() {
         </div>
          {/* --- End Search Bar Area --- */}
 
-
-      {/* Display Flash Success Message if present - Position adjusted */}
+      {/* Display Flash Success Message if present (Stays fixed if above scroll area) */}
       {successMessage && (
           <div className={styles.successMessage}>
               {successMessage}
           </div>
       )}
 
-      {/* Loading State or Client List */}
-      {isLoading ? (
-        // Add padding if spinner needs it, or style spinner container
-        <div style={{padding: '20px'}}><Spinner /></div>
-      ) : (
-        // Add padding/margin to the list container itself now
-        <ul className={styles.clientList}>
-          {filteredClients.length > 0 ? (
-            filteredClients.map((client) => (
-              <li key={client.id} className={styles.clientListItem}>
-                <Link to={`/client/${client.id}`} className={styles.clientLink}>
-                   {/* TODO: Add Avatar/Placeholder Here */}
-                   <div className={styles.avatarPlaceholder}></div>
-                   <div className={styles.clientInfo}>
-                      <span className={styles.clientName}>{client.name}</span>
-                      {/* Simplified display for demo */}
-                      {client.lastContact &&
-                        <span className={styles.lastContact}>Last Contact: {client.lastContact}</span>
-                      }
-                   </div>
-                   {/* TODO: Add indicator like pin/unread count here */}
-                   {/* <span className={styles.listItemAccessory}> > </span> */}
-                </Link>
-              </li>
-            ))
+      {/* --- NEW Scrollable List Area --- */}
+      <div className={styles.listScrollArea}>
+          {isLoading ? (
+            // Spinner needs to be inside scroll area or positioned absolutely
+             <div style={{padding: '40px', textAlign: 'center'}}><Spinner /></div>
           ) : (
-            <p className={styles.noResults}>
-                {searchTerm ? 'No clients match your search.' : 'No clients found.'}
-            </p>
+            <> {/* Use Fragment */}
+                {filteredClients.length > 0 ? (
+                    <ul className={styles.clientList}>
+                        {filteredClients.map((client) => (
+                        <li key={client.id} className={styles.clientListItem}>
+                            <Link to={`/client/${client.id}`} className={styles.clientLink}>
+                            <AvatarPlaceholder name={client.name} size={50} />
+                            <div className={styles.clientInfo}>
+                                <span className={styles.clientName}>{client.name}</span>
+                                {client.lastContact &&
+                                    <span className={styles.lastContact}>Last Contact: {client.lastContact}</span>
+                                }
+                            </div>
+                            </Link>
+                        </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p className={styles.noResults}>
+                        {searchTerm ? 'No clients match your search.' : 'No clients found.'}
+                    </p>
+                )}
+             </>
           )}
-        </ul>
-      )}
+      </div>
+      {/* --- End Scrollable List Area --- */}
+
     </div> // Close .clientListPageContainer div
   );
 }

@@ -9,8 +9,9 @@ import {
 import styles from './ClientDetailPage.module.css';
 import Spinner from '../components/Spinner';
 import ActionSheet from '../components/ActionSheet';
-import BackButton from '../components/BackButton'; // <-- Import BackButton
-import MoreOptionsButton from '../components/MoreOptionsButton'; // <-- Import MoreOptionsButton
+import BackButton from '../components/BackButton';
+import MoreOptionsButton from '../components/MoreOptionsButton';
+import AvatarPlaceholder from '../components/AvatarPlaceholder'; // Make sure this is imported
 
 // --- Dummy Data Section (Replace with API calls) ---
 const DUMMY_CLIENT_DETAILS = {
@@ -21,10 +22,23 @@ const DUMMY_CLIENT_DETAILS = {
   c5: { name: 'Edward Davis', email: 'ed.davis@domain.org', phone: '555-5555' },
 };
 
+// Add more notes to test scrolling
 const DUMMY_MEETING_NOTES = {
-  c1: [ { noteId: 'n101', date: '2023-10-26', summary: 'Portfolio Review, Risk Adjustment discussion.', nextSteps: 'Send updated risk profile form.' }, { noteId: 'n102', date: '2023-07-11', summary: 'Initial planning call. Discussed goals.', nextSteps: 'Gather financial documents.' }, ],
-  c2: [ { noteId: 'n201', date: '2023-09-15', summary: 'Planning Call, Next Steps Defined.', nextSteps: 'Draft initial financial plan. Schedule follow-up.' }, ],
-  c3: [ { noteId: 'n301', date: '2023-11-01', summary: 'Quick check-in call.', nextSteps: 'None immediately.' }, ],
+  c1: [
+    { noteId: 'n101', date: '2023-10-26', summary: 'Portfolio Review, Risk Adjustment discussion.', nextSteps: 'Send updated risk profile form.' },
+    { noteId: 'n102', date: '2023-07-11', summary: 'Initial planning call. Discussed goals.', nextSteps: 'Gather financial documents.' },
+    { noteId: 'n103', date: '2023-05-01', summary: 'Market update call.', nextSteps: 'Monitor specific index.' },
+    { noteId: 'n104', date: '2023-02-15', summary: 'Tax planning session.', nextSteps: 'Client to provide accountant details.' },
+    { noteId: 'n105', date: '2022-12-01', summary: 'End of year review.', nextSteps: 'Prepare for next year.' },
+    { noteId: 'n106', date: '2022-10-05', summary: 'Check-in regarding previous action item.', nextSteps: 'Action completed.' },
+    { noteId: 'n107', date: '2022-08-20', summary: 'Discussion on alternative investments.', nextSteps: 'Provide research materials.' },
+  ],
+  c2: [
+    { noteId: 'n201', date: '2023-09-15', summary: 'Planning Call, Next Steps Defined.', nextSteps: 'Draft initial financial plan. Schedule follow-up.' },
+  ],
+  c3: [
+    { noteId: 'n301', date: '2023-11-01', summary: 'Quick check-in call.', nextSteps: 'None immediately.' },
+  ],
 };
 // --- End Dummy Data ---
 
@@ -48,27 +62,18 @@ function ClientDetailPage() {
 
   // --- Effect to Fetch Client Details and Notes ---
   useEffect(() => {
-    setIsLoading(true);
-    setError('');
-    setSuccessMessage(''); // Clear message on load
+    setIsLoading(true); setError(''); setSuccessMessage('');
     console.log("Fetching data for client ID:", clientId);
-
     // Simulate API Fetch
     setTimeout(() => {
       const clientDetails = DUMMY_CLIENT_DETAILS[clientId];
       const clientNotes = DUMMY_MEETING_NOTES[clientId] || [];
-
       if (clientDetails) {
-        setClient(clientDetails);
-        setNotes(clientNotes);
-        setIsLoading(false);
+        setClient(clientDetails); setNotes(clientNotes); setIsLoading(false);
       } else {
-        setError(`Client with ID ${clientId} not found.`);
-        setIsLoading(false);
-        console.error("Client not found:", clientId);
+        setError(`Client with ID ${clientId} not found.`); setIsLoading(false); console.error("Client not found:", clientId);
       }
     }, 500);
-
   }, [clientId]);
 
   // --- Effect to Handle Incoming Success Messages ---
@@ -81,30 +86,24 @@ function ClientDetailPage() {
     }
   }, [location.state]);
 
-
   // --- Handlers ---
-  const handleAddNote = () => {
-    navigate(`/client/${clientId}/add-note`);
-  };
+  const handleAddNote = () => navigate(`/client/${clientId}/add-note`);
 
   const handleDeleteClient = () => {
     if (!client || !window.confirm(`Are you sure you want to delete client ${client.name}? This will also delete all associated meeting notes and cannot be undone.`)) {
       handleCloseActionSheet(); return;
     }
-    setIsDeletingClient(true); setError('');
-    console.log(`Attempting to delete client ID: ${clientId}`);
-    setTimeout(() => { // Simulate API Delete Call
+    setIsDeletingClient(true); setError(''); console.log(`Attempting to delete client ID: ${clientId}`);
+    // Simulate API Delete
+    setTimeout(() => {
       try {
         console.log('Client deleted successfully (Simulated)');
-        // TODO: Delete actual dummy data if needed for better simulation
-        // delete DUMMY_CLIENT_DETAILS[clientId];
-        // delete DUMMY_MEETING_NOTES[clientId];
+        // TODO: Delete from dummy data
         setIsDeletingClient(false);
         navigate('/', { state: { message: `Client ${client.name} deleted successfully.` } });
       } catch (apiError) {
         console.error('Failed to delete client (Simulated):', apiError);
-        setError('Failed to delete client. Please try again.');
-        setIsDeletingClient(false); handleCloseActionSheet();
+        setError('Failed to delete client. Please try again.'); setIsDeletingClient(false); handleCloseActionSheet();
       }
     }, 1000);
   };
@@ -114,107 +113,126 @@ function ClientDetailPage() {
 
   const handleEditClient = () => {
       console.log("Navigating to edit client page:", `/client/${clientId}/edit`);
-      navigate(`/client/${clientId}/edit`); // Navigate to the edit route
+      navigate(`/client/${clientId}/edit`);
   };
 
-  // Define actions for the ActionSheet component
   const sheetActions = [
     { label: 'Edit Client', onClick: () => { handleCloseActionSheet(); handleEditClient(); }, disabled: isDeletingClient },
     { label: 'Delete Client', onClick: handleDeleteClient, destructive: true, disabled: isDeletingClient },
   ];
 
-
   // --- Render Logic ---
-  if (isLoading) { return <Spinner />; }
-
+  if (isLoading) {
+    return ( // Wrap spinner for consistent layout
+        <div className={styles.clientDetailPageContainer}>
+            <div className={styles.fixedContent}> <BackButton to="/" label="Clients" /> </div>
+            <div className={styles.scrollContentCentered}> <Spinner /> </div>
+        </div>
+    );
+  }
   if (error && !isDeletingClient) {
-     return (
-       <div className={`${styles.clientDetailPage} ${styles.errorContainer}`}>
-          <BackButton to="/" label="Clients" /> {/* Use BackButton */}
-          <div className={styles.error}>
-              <strong>Error Loading Client Data</strong> <p>{error}</p>
+     return ( // Wrap error for consistent layout
+       <div className={`${styles.clientDetailPageContainer} ${styles.errorContainer}`}>
+          <div className={styles.fixedContent}> <BackButton to="/" label="Clients" /> </div>
+          <div className={styles.scrollContentCentered}>
+              <div className={styles.error}> <strong>Error Loading Client Data</strong> <p>{error}</p> </div>
           </div>
        </div>
      );
   }
   if (!client && !isLoading) {
-    return (
-       <div className={`${styles.clientDetailPage} ${styles.errorContainer}`}>
-            <BackButton to="/" label="Clients" /> {/* Use BackButton */}
-            <div className={styles.error}> <p>Client data could not be loaded.</p> </div>
+    return ( // Wrap fallback error
+       <div className={`${styles.clientDetailPageContainer} ${styles.errorContainer}`}>
+           <div className={styles.fixedContent}> <BackButton to="/" label="Clients" /> </div>
+            <div className={styles.scrollContentCentered}>
+                <div className={styles.error}> <p>Client data could not be loaded.</p> </div>
+            </div>
        </div>
     );
   }
 
   // --- Main Page Content ---
   return (
-    <div className={styles.clientDetailPage}>
+    <div className={styles.clientDetailPageContainer}>
 
-      {/* --- Use BackButton Component --- */}
-      <BackButton to="/" label="Clients" />
+        {/* Fixed Content Wrapper */}
+        <div className={styles.fixedContent}>
+            {/* Back Button */}
+            <BackButton to="/" label="Clients" />
 
-      {/* Display Flash Success Message */}
-      {successMessage && (<div className={styles.successMessage}>{successMessage}</div>)}
-      {/* Display delete error specifically */}
-       {error && isDeletingClient && (<div className={styles.inlineError}>{error}</div>)}
+            {/* Flash Success Message */}
+            {successMessage && (<div className={styles.successMessage}>{successMessage}</div>)}
+            {/* Delete Error Message */}
+            {error && isDeletingClient && (<div className={styles.inlineError}>{error}</div>)}
 
-      {/* Client Header Section */}
-      <div className={styles.clientHeader}>
-        {client && (
-          <>
-            <div className={styles.headerContent}>
-              <h2>{client.name}</h2>
-              <div className={styles.contactInfo}>
-                {client.email && <span>Email: {client.email}</span>}
-                {client.phone && <span>Phone: {client.phone}</span>}
+            {/* Client Header */}
+            <div className={styles.clientHeader}>
+                {client && (
+                <>
+                    <div className={styles.avatarContainer}>
+                        <AvatarPlaceholder name={client.name} size={60} />
+                    </div>
+                    <div className={styles.headerContent}>
+                        <h2>{client.name}</h2>
+                        <div className={styles.contactInfo}>
+                            {client.email && <span>Email: {client.email}</span>}
+                            {client.phone && <span>Phone: {client.phone}</span>}
+                        </div>
+                    </div>
+                    <div className={styles.headerActions}>
+                        <MoreOptionsButton
+                            onClick={handleOpenActionSheet}
+                            disabled={!client || isDeletingClient}
+                            ariaLabel="More client options"
+                        />
+                    </div>
+                </>
+                )}
+            </div>
+
+            {/* Add Note Button */}
+            {client && (
+                <div className={styles.actions}>
+                    <button onClick={handleAddNote} className={styles.addNoteButton}>
+                        + Add New Meeting Note for {client.name}
+                    </button>
+                </div>
+            )}
+             {/* Notes List Header (Fixed) */}
+              <div className={styles.notesSectionHeader}>
+                 <h3>Recent Meetings</h3>
               </div>
-            </div>
-            <div className={styles.headerActions}>
-                 {/* --- Use MoreOptionsButton Component --- */}
-                 <MoreOptionsButton
-                    onClick={handleOpenActionSheet}
-                    disabled={!client || isDeletingClient}
-                    ariaLabel="More client options"
-                 />
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* Add Note Action Button */}
-      {client && (
-        <div className={styles.actions}>
-          <button onClick={handleAddNote} className={styles.addNoteButton}>
-            + Add New Meeting Note for {client.name}
-          </button>
         </div>
-      )}
+        {/* End Fixed Content Wrapper */}
 
-      {/* Meeting Notes Section */}
-      <div className={styles.notesSection}>
-        <h3>Recent Meetings</h3>
-        {notes.length > 0 ? (
-          <ul className={styles.notesList}>
-            {notes.map((note) => (
-              <li key={note.noteId} className={styles.noteItem}>
-                 <Link to={`/client/${clientId}/note/${note.noteId}`} className={styles.noteLink}>
-                    <div className={styles.noteDate}>{note.date}</div>
-                    <div className={styles.noteSummary}>{note.summary}</div>
-                 </Link>
-              </li>
-            ))}
-          </ul>
-        ) : ( <p>No meeting notes recorded for this client yet.</p> )}
-      </div>
 
-      {/* --- Action Sheet Component --- */}
+        {/* Scrollable Notes Area */}
+        <div className={styles.notesScrollArea}>
+            {/* Removed notesSection div wrapper, header moved to fixed */}
+            {notes.length > 0 ? (
+            <ul className={styles.notesList}>
+                {notes.map((note) => (
+                <li key={note.noteId} className={styles.noteItem}>
+                    <Link to={`/client/${clientId}/note/${note.noteId}`} className={styles.noteLink}>
+                        <div className={styles.noteDate}>{note.date}</div>
+                        <div className={styles.noteSummary}>{note.summary}</div>
+                    </Link>
+                </li>
+                ))}
+            </ul>
+            ) : ( <p className={styles.noResults}>No meeting notes recorded yet.</p> )}
+        </div>
+        {/* End Scrollable Notes Area */}
+
+
+      {/* Action Sheet (Positioned Fixed) */}
       <ActionSheet
         isOpen={isActionSheetOpen}
         onClose={handleCloseActionSheet}
         actions={sheetActions}
       />
 
-    </div>
+    </div> // End clientDetailPageContainer
   );
 }
 export default ClientDetailPage;

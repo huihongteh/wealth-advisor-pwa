@@ -1,19 +1,25 @@
 /* src/pages/ClientListPage.module.css */
 
-/* Container for the whole page, minimal padding */
+/* Container for the whole page */
 .clientListPageContainer {
-  /* No max-width or centering needed if header/search are full width */
-  padding-bottom: 20px; /* Space at the bottom */
+  display: flex;
+  flex-direction: column;
+  /* Calculate height: 100vh MINUS BottomNav height MINUS BottomNav safe area */
+  /* Adjust 60px if your BottomNav height is different */
+  height: calc(100vh - 60px - env(safe-area-inset-bottom));
+  overflow: hidden; /* Prevent container itself from scrolling */
 }
 
-/* New Header Styles */
+/* Header Styles */
 .pageHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 20px; /* Standard padding */
-  /* background-color: #f8f9fa; Optional background */
-  /* border-bottom: 1px solid #eee; Optional border */
+  padding: 15px 20px;
+  flex-shrink: 0; /* Prevent header from shrinking */
+  /* Optional: Add background if needed when list scrolls under */
+  /* background-color: #ffffff; */
+  /* border-bottom: 1px solid #eee; */
 }
 
 .pageTitle {
@@ -42,9 +48,13 @@
   background-color: #0056b3; /* Darker blue or green #128C7E */
 }
 
-/* New Search Bar Styles */
+/* Search Bar Styles */
 .searchContainer {
-  padding: 5px 15px 10px 15px; /* Padding around search bar */
+  padding: 5px 15px 10px 15px;
+  flex-shrink: 0; /* Prevent search from shrinking */
+   /* Optional: Add background if needed */
+  /* background-color: #ffffff; */
+  /* border-bottom: 1px solid #eee; */
 }
 
 .searchInput {
@@ -72,28 +82,31 @@
 }
 
 
-/* Success Message Style - position below search bar */
+/* Success Message Style */
 .successMessage {
-  background-color: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
-  padding: 10px 15px; /* Slightly less padding */
-  margin: 5px 15px 10px 15px; /* Margins */
-  border-radius: 4px;
-  text-align: center;
-  font-size: 0.9em;
+  /* Keep existing styles */
+  /* It will remain fixed above the scroll area */
+   margin: 5px 15px 10px 15px; /* Ensure it has margin */
+   flex-shrink: 0; /* Prevent shrinking */
 }
 
-
-/* --- REMOVED Styles --- */
-/* .actionBar, .filterGroup, .filterLabel, .dateInput, .advancedFilterToggle, .arrowIcon, .clearButton, .advancedFiltersContainer, .visible, .hidden */
-
+/* --- Scrollable Area --- */
+.listScrollArea {
+  flex-grow: 1; /* Takes up remaining vertical space */
+  overflow-y: auto; /* Enable vertical scrolling ONLY for this div */
+  overflow-x: hidden; /* Prevent horizontal scroll */
+  /* Add padding inside the scroll area */
+  padding: 0 0px 0px 0px; /* Only bottom padding needed maybe? Adjust */
+  position: relative; /* Needed if spinner is positioned absolutely inside */
+   -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
 
 /* Client List Styles */
 .clientList {
-list-style: none;
-padding: 0;
-margin: 10px 0 0 0; /* Add margin top */
+  list-style: none;
+  padding: 0 0 20px 0; /* Add bottom padding inside scroll */
+  margin: 0; /* Reset margin */
+  /* No height or overflow needed here */
 }
 .clientListItem {
 /* Remove border, use separator line */
@@ -116,16 +129,6 @@ background-color: #f0f2f5; /* Subtle hover */
 }
 .clientListItem:last-child .clientLink {
   border-bottom: none; /* No border for last item */
-}
-
-/* --- NEW Avatar Placeholder --- */
-.avatarPlaceholder {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background-color: #dfe5e7; /* Placeholder color */
-  flex-shrink: 0; /* Prevent shrinking */
-  /* Add display flex, align-items, justify-content and icon inside later */
 }
 
 /* Container for Name and Last Contact */
@@ -161,7 +164,5 @@ margin-top: 2px; /* Small space below name */
   margin-top: 30px;
   padding: 20px;
   font-style: italic;
+  padding: 40px 20px; /* Add padding if it's inside scroll area */
 }
-
-/* --- REMOVED Styles --- */
-/* .lastContact styles involving display:block, flex-shrink, etc. might be adjusted or removed depending on new layout */

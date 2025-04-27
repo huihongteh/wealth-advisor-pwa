@@ -32,3 +32,8 @@ button {
     font-family: inherit;
 }
 body.noScroll { overflow: hidden; }
+
+.appContainer {
+  min-height: 100vh;
+  box-sizing: border-box;
+}

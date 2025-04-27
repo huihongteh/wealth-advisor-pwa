@@ -1,19 +1,36 @@
 /* src/pages/ClientDetailPage.module.css */
 
-.clientDetailPage {
-  max-width: 900px;
-  margin: 0 auto 20px auto;
-  padding: 0 20px 20px 20px;
+/* Main Flex Container */
+.clientDetailPageContainer {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 60px - env(safe-area-inset-bottom)); /* Adjust 60px if nav bar height changes */
+  overflow: hidden;
 }
-.errorContainer {
-    padding-top: 10px;
+
+/* Wrapper for non-scrolling content */
+.fixedContent {
+    flex-shrink: 0;
+    padding: 0 20px; /* Horizontal padding */
+    padding-top: 10px; /* Space for back button */
+    /* Optional: Add background if needed */
+    /* background-color: #ffffff; */
+}
+
+/* Centering wrapper for loading/error states */
+.scrollContentCentered {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px; /* Padding inside scroll area for centered content */
+    overflow-y: auto; /* Allow scroll if error message is huge */
 }
 
 /* Error and Success Message Styling */
-.error {
+.error { /* Error block itself */
     text-align: center;
     padding: 30px 20px;
-    margin: 20px auto 0 auto;
     max-width: 600px;
     border: 1px solid #f5c6cb;
     background-color: #f8d7da;
@@ -21,137 +38,94 @@
     border-radius: 8px;
 }
 .error strong {
-    display: block;
-    margin-bottom: 10px;
-    font-size: 1.1em;
+    display: block; margin-bottom: 10px; font-size: 1.1em;
 }
 .error a {
-    display: inline-block;
-    margin-top: 15px;
-    color: #007bff;
-    font-weight: bold;
+    display: inline-block; margin-top: 15px; color: #007bff; font-weight: bold;
 }
 .inlineError {
-    color: #dc3545;
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-    border-radius: 4px;
-    padding: 10px;
-    margin-bottom: 15px;
-    text-align: center;
-    font-size: 0.9em;
+    color: #dc3545; background-color: #f8d7da; border: 1px solid #f5c6cb;
+    border-radius: 4px; padding: 10px; margin-bottom: 15px;
+    text-align: center; font-size: 0.9em;
+    /* Removed margin-left/right as it's inside fixedContent now */
 }
 .successMessage {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-    padding: 15px;
-    margin-bottom: 20px;
-    border-radius: 4px;
-    text-align: center;
-    font-size: 0.95em;
+    background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;
+    padding: 15px; margin-bottom: 20px; border-radius: 4px;
+    text-align: center; font-size: 0.95em;
+    /* Removed margin-left/right */
 }
 
 /* Header Styles */
 .clientHeader {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     padding: 15px 0;
     border-bottom: 1px solid #eee;
-    margin-bottom: 25px;
+    margin-top: 10px;
+    margin-bottom: 20px;
     gap: 15px;
 }
-.headerContent {
-     flex-grow: 1;
-}
+.avatarContainer { flex-shrink: 0; }
+.headerContent { flex-grow: 1; }
 .headerContent h2 {
-  margin-top: 0;
-  margin-bottom: 5px;
-  font-size: 1.6rem;
-  font-weight: 600;
-  color: #1c1e21;
+  margin-top: 0; margin-bottom: 5px; font-size: 1.6rem; font-weight: 600; color: #1c1e21;
 }
-.contactInfo {
-  font-size: 0.9rem;
-  color: #657786;
-}
-.contactInfo span {
-  margin-right: 15px;
-  display: inline-block;
-  margin-top: 3px;
-}
-.headerActions {
-    flex-shrink: 0;
-    align-self: center;
-}
+.contactInfo { font-size: 0.9rem; color: #657786; }
+.contactInfo span { margin-right: 15px; display: inline-block; margin-top: 3px; }
+.headerActions { flex-shrink: 0; }
+
 
 /* Add Note Button Styles */
 .actions {
-  margin-bottom: 30px;
+    margin-bottom: 15px; /* Space below Add Note button */
+    flex-shrink: 0;
 }
 .addNoteButton {
-  padding: 10px 18px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  font-weight: 500;
-  cursor: pointer;
+  padding: 10px 18px; background-color: #007bff; color: white; border: none;
+  border-radius: 6px; font-size: 0.95rem; font-weight: 500; cursor: pointer;
   transition: background-color 0.2s ease;
 }
-.addNoteButton:hover {
-  background-color: #0056b3;
+.addNoteButton:hover { background-color: #0056b3; }
+
+/* Fixed Notes List Header */
+.notesSectionHeader {
+    padding-bottom: 8px;
+    margin-bottom: 5px; /* Small space before list starts */
+    border-bottom: 1px solid #eee;
+    flex-shrink: 0; /* Part of fixed content */
+}
+.notesSectionHeader h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1c1e21;
+    margin: 0; /* Remove default margin */
 }
 
 
-/* Notes List Styles */
-.notesSection {
-  margin-top: 30px;
+/* Scrollable Notes Area */
+.notesScrollArea {
+    flex-grow: 1; /* Takes up remaining vertical space */
+    overflow-y: auto; /* Enable vertical scrolling */
+    overflow-x: hidden;
+    padding: 0 20px 20px 20px; /* Horizontal and bottom padding */
+     -webkit-overflow-scrolling: touch;
 }
-.notesSection h3 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #1c1e21;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 8px;
-  margin-bottom: 15px;
-}
-.notesList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
+
+/* Notes Section - Container inside scroll */
+.notesSection { margin-top: 0; } /* Removed top margin */
+/* Removed h3 styling - moved to fixed header */
+
+.notesList { list-style: none; padding: 0; margin: 0; }
 .noteItem {
-  margin-bottom: 0;
-  border: none;
-  border-bottom: 1px solid #f0f2f5;
-  transition: background-color 0.2s ease;
+    margin-bottom: 0; border: none; border-bottom: 1px solid #f0f2f5;
+    transition: background-color 0.2s ease;
 }
-.noteItem:last-child {
-  border-bottom: none;
-}
-.noteItem:hover {
-   background-color: #f8f9fa;
-}
-.noteLink {
-    display: block;
-    padding: 12px 5px;
-    text-decoration: none;
-    color: inherit;
-}
-.noteDate {
-  font-weight: 500;
-  margin-bottom: 5px;
-  color: #1c1e21;
-  font-size: 0.95em;
-}
-.noteSummary {
-  font-size: 0.9em;
-  color: #657786;
-  line-height: 1.4;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.noteItem:last-child { border-bottom: none; }
+.noteItem:hover { background-color: #f8f9fa; }
+.noteLink { display: block; padding: 12px 0px; text-decoration: none; color: inherit; } /* Reduced horizontal padding */
+.noteDate { font-weight: 500; margin-bottom: 5px; color: #1c1e21; font-size: 0.95em; }
+.noteSummary { font-size: 0.9em; color: #657786; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.noResults {
+    text-align: center; color: #666; margin-top: 30px; padding: 20px; font-style: italic;
 }

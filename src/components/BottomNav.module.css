@@ -1,0 +1,44 @@
+/* src/components/BottomNav.module.css */
+.bottomNavContainer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px; /* Adjust height as needed, plus safe-area */
+    padding-bottom: env(safe-area-inset-bottom); /* iOS safe area */
+    background-color: #f8f9fa; /* Light background */
+    border-top: 1px solid #e0e0e0; /* Separator line */
+    display: flex;
+    justify-content: space-around; /* Distribute items evenly */
+    align-items: flex-start; /* Align icon/text top */
+    padding-top: 6px; /* Padding above icons */
+    z-index: 900; /* Below action sheets, above content */
+  }
+  
+  .navItem {
+    display: flex;
+    flex-direction: column; /* Stack icon and label */
+    align-items: center;
+    text-decoration: none;
+    color: #6c757d; /* Default grey icon/text color */
+    font-size: 0.7rem; /* Small label text */
+    padding: 0 10px; /* Horizontal padding */
+    flex-grow: 1; /* Allow items to take space */
+    text-align: center;
+    transition: color 0.2s ease;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+  }
+  
+  .navItem svg {
+    width: 24px; /* Icon size */
+    height: 24px;
+    margin-bottom: 2px; /* Space between icon and label */
+  }
+  
+  .navItem.active {
+    color: #007aff; /* Active color (iOS blue) */
+  }
+  
+  .label {
+    line-height: 1.2;
+  }
