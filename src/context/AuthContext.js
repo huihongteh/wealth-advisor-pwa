@@ -1,74 +1,76 @@
 // src/context/AuthContext.js
-import React, { createContext, useState, useContext, useEffect } from 'react'; // Import useEffect
+import React, { createContext, useState, useContext } from 'react';
 
-// Key to use for storing user data in sessionStorage
+// Key names for storage
 const USER_STORAGE_KEY = 'pwa-auth-user';
+const TOKEN_STORAGE_KEY = 'pwa-auth-token'; // <-- New key for token
 
-// 1. Create the context
-const AuthContext = createContext(null);
-
-// Helper function to get initial state from sessionStorage
+// Helper function to get initial state
 const getInitialAuthState = () => {
+    let user = null;
+    let token = null;
     try {
         const storedUser = sessionStorage.getItem(USER_STORAGE_KEY);
-        if (storedUser) {
-            // Parse the stored JSON string back into an object
-            return JSON.parse(storedUser);
+        const storedToken = sessionStorage.getItem(TOKEN_STORAGE_KEY);
+        if (storedUser && storedToken) {
+            user = JSON.parse(storedUser);
+            token = storedToken;
+            // TODO: Optional: Verify token expiry here? For now, assume valid if present.
+            console.log('[AuthContext Init] Found user and token in storage.');
         }
     } catch (error) {
-        console.error("Error reading user from sessionStorage", error);
-        // If error parsing, remove the potentially corrupted item
+        console.error("Error reading auth state from sessionStorage", error);
         sessionStorage.removeItem(USER_STORAGE_KEY);
+        sessionStorage.removeItem(TOKEN_STORAGE_KEY);
     }
-    // If nothing found or error occurred, return null (logged out)
-    return null;
+    return { user, token };
 };
 
 
-// 2. Create the Provider component
+const AuthContext = createContext(null);
+
 export const AuthProvider = ({ children }) => {
-    // Initialize state by calling the helper function
-    const [user, setUser] = useState(getInitialAuthState);
+    const initialAuthState = getInitialAuthState();
+    const [user, setUser] = useState(initialAuthState.user);
+    const [token, setToken] = useState(initialAuthState.token); // <-- State for token
 
-    // NEW: Effect to update sessionStorage whenever user state changes
-    // This ensures consistency if state is updated elsewhere, although
-    // login/logout are the primary places.
-    useEffect(() => {
-        try {
-            if (user) {
-                // Store the user object as a JSON string
-                sessionStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
-                 console.log('[AuthContext Effect] User saved to sessionStorage:', user);
-            } else {
-                // If user is null (logged out), remove the item
-                sessionStorage.removeItem(USER_STORAGE_KEY);
-                 console.log('[AuthContext Effect] User removed from sessionStorage.');
-            }
-        } catch (error) {
-            console.error("Error updating sessionStorage", error);
+    // Login: Stores user AND token
+    const login = (userData, receivedToken) => { // <-- Accept token
+        if (!userData || !receivedToken) {
+            console.error("[AuthContext Login] Missing user data or token");
+            return;
         }
-    }, [user]); // Run this effect whenever the user state changes
-
-    // Login function (updates state, which triggers the useEffect)
-    const login = (userData) => {
-        // Construct the user object you want to store
-        const userToStore = { email: userData.email, name: 'Advisor Name' }; // Example
-        setUser(userToStore); // Update React state
-        // The useEffect will handle saving to sessionStorage
-        console.log('[AuthContext] Login function called. User state set to:', userToStore);
+        const userToStore = { id: userData.id, email: userData.email, name: userData.name };
+        try {
+            sessionStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userToStore));
+            sessionStorage.setItem(TOKEN_STORAGE_KEY, receivedToken); // <-- Store token
+            setUser(userToStore);
+            setToken(receivedToken); // <-- Set token state
+            console.log('[AuthContext] Login: User and token stored.');
+        } catch (error) {
+             console.error("Error saving auth state to sessionStorage", error);
+        }
     };
 
-    // Logout function (updates state, which triggers the useEffect)
+    // Logout: Clears user AND token
     const logout = () => {
-        setUser(null); // Update React state to null
-        // The useEffect will handle removing from sessionStorage
-        console.log('[AuthContext] Logout function called. User state set to null.');
+        try {
+            sessionStorage.removeItem(USER_STORAGE_KEY);
+            sessionStorage.removeItem(TOKEN_STORAGE_KEY); // <-- Remove token
+            setUser(null);
+            setToken(null); // <-- Clear token state
+            console.log('[AuthContext] Logout: User and token removed.');
+        } catch (error) {
+             console.error("Error removing auth state from sessionStorage", error);
+        }
     };
 
-    // The value provided (isAuthenticated is derived directly from user state)
+    // Value provided includes token and a getter function
     const value = {
         user,
-        isAuthenticated: !!user, // True if user object exists, false if null
+        token, // <-- Provide token
+        getToken: () => sessionStorage.getItem(TOKEN_STORAGE_KEY), // <-- Helper function
+        isAuthenticated: !!user && !!token, // <-- Check both user and token
         login,
         logout,
     };

@@ -13,35 +13,44 @@ function LoginPage() {
   const auth = useAuth(); // Get auth object from context
   // const navigate = useNavigate(); // If using programmatic navigation
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => { 
     event.preventDefault();
     setError('');
     setIsLoading(true);
 
     console.log('Attempting login with:');
     console.log('Email:', email);
-    console.log('Password:', password); // Still don't log in real app
+    try {
+      // --- Call Backend API ---
+      const response = await fetch('/api/auth/login', { // <-- Use relative path or full backend URL
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
+      });
 
-    setTimeout(() => {
-      // **--- Fake Auth Check ---**
-      // Replace with actual API call
-      if (email === 'advisor@example.com' && password === 'password') {
-        console.log('Login Successful (Placeholder)');
-        // Call the login function from AuthContext
-        // Pass necessary data (e.g., from API response)
-        // --- Add this log ---
-        console.log('[LoginPage] Calling auth.login...');
-        auth.login({ email: email }); // Pass dummy data for now
-        setIsLoading(false);
-        // Navigation is now handled by the Route definitions in App.js
-        // navigate('/'); // Alternative: programmatic navigation
-      } else {
-        console.log('Login Failed (Placeholder)');
-        setError('Invalid email or password.');
-        setIsLoading(false);
+      const data = await response.json(); // Always parse JSON response
+
+      if (!response.ok) {
+          // Handle API errors (401, 400, 500 etc.)
+          throw new Error(data.error || `HTTP error! status: ${response.status}`);
       }
-      // **--- End Fake Auth Check ---**
-    }, 1000);
+
+      // --- Success ---
+      console.log('API Login Successful:', data);
+      // Call context login with user data from API response
+      auth.login(data.user, data.token); // Pass both user and token
+      // No explicit navigation needed, App.js handles redirect on auth state change
+
+    } catch (err) {
+        // --- Error ---
+        console.error('API Login Failed:', err);
+        // Use error message from API if available, otherwise generic
+        setError(err.message || 'Login failed. Please try again.');
+        setIsLoading(false); // Stop loading on error
+    }
+    // No need for setIsLoading(false) on success if navigating immediately
   };
 
   // ... (rest of the component remains the same: form, inputs, button, etc.)

@@ -1,63 +1,79 @@
 // src/pages/ClientListPage.js
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import styles from './ClientListPage.module.css'; // Import CSS module
-import Spinner from '../components/Spinner'; // Import Spinner component
+import styles from './ClientListPage.module.css';
+import Spinner from '../components/Spinner';
 import AvatarPlaceholder from '../components/AvatarPlaceholder';
-
-// --- Dummy Data ---
-const DUMMY_CLIENTS = [
-  { id: 'c1', name: 'Aaron Smith', lastContact: '2023-10-26' },
-  { id: 'c2', name: 'Betty Jones', lastContact: '2023-09-15' },
-  { id: 'c3', name: 'Charles Williams', lastContact: '2023-11-01' },
-  { id: 'c4', name: 'Diana Brown', lastContact: '2023-08-10' },
-  { id: 'c5', name: 'Edward Davis', lastContact: '2023-11-05' },
-  { id: 'c6', name: 'Fiona Garcia', lastContact: null },
-];
-// --- End Dummy Data ---
+import apiClient from '../utils/apiClient'; // <-- Import the API client helper
+import { useAuth } from '../context/AuthContext'; // <-- Import useAuth for potential error handling
 
 function ClientListPage() {
   // State for data & loading
   const [clients, setClients] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(''); // <-- State for fetch errors
 
   // Hooks
   const navigate = useNavigate();
   const location = useLocation();
+  const auth = useAuth(); // <-- Get auth context
 
   // State for UI feedback
   const [successMessage, setSuccessMessage] = useState('');
 
-  // --- Filter States (Keep state, hide UI elements) ---
+  // --- Filter States ---
   const [searchTerm, setSearchTerm] = useState('');
-  // const [filterStartDate, setFilterStartDate] = useState(''); // Keep state if needed later
-  // const [filterEndDate, setFilterEndDate] = useState('');     // Keep state if needed later
-  // const [isAdvancedFilterVisible, setIsAdvancedFilterVisible] = useState(false); // Keep state if needed later
+  // Keep date filter states if you plan to re-add the UI later
+  // const [filterStartDate, setFilterStartDate] = useState('');
+  // const [filterEndDate, setFilterEndDate] = useState('');
+  // const [isAdvancedFilterVisible, setIsAdvancedFilterVisible] = useState(false);
   // --- End Filter States ---
 
-  // Effect for loading initial client data
+  // --- Effect for loading initial client data from API ---
   useEffect(() => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setClients(DUMMY_CLIENTS);
-      setIsLoading(false);
-    }, 500);
-  }, []);
+    const fetchClients = async () => {
+      setIsLoading(true);
+      setError(''); // Clear previous errors on new fetch
+      try {
+        console.log("ClientListPage: Fetching clients...");
+        const data = await apiClient('/clients'); // Call API GET /api/clients
+        setClients(data || []); // Set clients from response, default to empty array
+        console.log("ClientListPage: Clients fetched successfully", data?.length);
+      } catch (err) {
+        console.error("ClientListPage: Failed to fetch clients:", err);
+        setError(err.message || 'Failed to load clients.'); // Set error message
 
-  // Effect for handling success messages
+        // Handle token errors (e.g., 401 Unauthorized)
+        if (err.status === 401 || err.status === 403) {
+             console.log("ClientListPage: Auth error detected, logging out.");
+             // Optionally show a specific message before logout
+             // setError("Your session has expired. Please log in again.");
+             // Use setTimeout to allow user to see message briefly?
+             setTimeout(() => auth.logout(), 1500); // Logout on auth error
+        }
+      } finally {
+        setIsLoading(false); // Stop loading in success or error case
+      }
+    };
+
+    fetchClients();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount (Auth context dependency is stable)
+
+  // --- Effect for handling success messages (from delete client, add client) ---
    useEffect(() => {
     if (location.state?.message) {
       setSuccessMessage(location.state.message);
       const timer = setTimeout(() => setSuccessMessage(''), 5000);
-      window.history.replaceState({}, document.title);
+      window.history.replaceState({}, document.title); // Clear state from history
       return () => clearTimeout(timer);
     }
   }, [location.state]);
 
-  // --- Filtering Logic (Simplified back to just name search for now) ---
+  // --- Filtering Logic (only by name currently) ---
   const filteredClients = clients.filter(client => {
     const nameMatch = client.name.toLowerCase().includes(searchTerm.toLowerCase());
-    // Add date filter logic back here if UI is re-introduced
+    // Add date/other filter logic here if needed later
     return nameMatch;
   });
   // --- End Filtering Logic ---
@@ -65,21 +81,33 @@ function ClientListPage() {
   // --- Handlers ---
   const handleAddClient = () => navigate('/add-client');
 
+  // Clear only search term for now
+  // const handleClearFilters = () => {
+  //     setSearchTerm('');
+  //     // Clear date filters too if they were active
+  //     // setFilterStartDate('');
+  //     // setFilterEndDate('');
+  //     // setIsAdvancedFilterVisible(false);
+  // };
+
+  // Keep toggle handler if advanced filter UI might return
+  // const toggleAdvancedFilters = () => { setIsAdvancedFilterVisible(prevState => !prevState); };
+  // --- End Handlers ---
+
+
   // --- Render Logic ---
   return (
-    // Main container needs layout adjustments via CSS
     <div className={styles.clientListPageContainer}>
 
-        {/* --- Fixed Header Area --- */}
+        {/* Header Area */}
         <div className={styles.pageHeader}>
             <h1 className={styles.pageTitle}>Clients</h1>
             <button onClick={handleAddClient} className={styles.addButtonTopRight} aria-label="Add New Client">
                 +
             </button>
         </div>
-        {/* --- End Header Area --- */}
 
-        {/* --- Fixed Search Bar Area --- */}
+        {/* Search Bar Area */}
         <div className={styles.searchContainer}>
              <input
                 type="text"
@@ -89,47 +117,55 @@ function ClientListPage() {
                 className={styles.searchInput}
               />
         </div>
-         {/* --- End Search Bar Area --- */}
 
-      {/* Display Flash Success Message if present (Stays fixed if above scroll area) */}
+        {/* --- REMOVED Toggle Button & Advanced Filter Section --- */}
+        {/* Keep clear button if needed, maybe alongside search */}
+        {/* <button onClick={handleClearFilters} className={styles.clearButton}> Clear </button> */}
+
+
+      {/* Display Flash Success Message */}
       {successMessage && (
           <div className={styles.successMessage}>
               {successMessage}
           </div>
       )}
 
-      {/* --- NEW Scrollable List Area --- */}
-      <div className={styles.listScrollArea}>
-          {isLoading ? (
-            // Spinner needs to be inside scroll area or positioned absolutely
-             <div style={{padding: '40px', textAlign: 'center'}}><Spinner /></div>
-          ) : (
-            <> {/* Use Fragment */}
+       {/* --- Display Fetch Error Message --- */}
+       {error && !isLoading && <div className={styles.inlineError}>{error}</div>}
+
+
+        {/* --- List Area (Handles Loading/Empty/Data states) --- */}
+        <div className={styles.listScrollArea}>
+            {isLoading ? (
+                <div style={{padding: '40px', textAlign: 'center'}}><Spinner /></div>
+            ) : (
+            <>
                 {filteredClients.length > 0 ? (
-                    <ul className={styles.clientList}>
-                        {filteredClients.map((client) => (
-                        <li key={client.id} className={styles.clientListItem}>
-                            <Link to={`/client/${client.id}`} className={styles.clientLink}>
-                            <AvatarPlaceholder name={client.name} size={50} />
-                            <div className={styles.clientInfo}>
-                                <span className={styles.clientName}>{client.name}</span>
-                                {client.lastContact &&
-                                    <span className={styles.lastContact}>Last Contact: {client.lastContact}</span>
-                                }
-                            </div>
-                            </Link>
-                        </li>
-                        ))}
-                    </ul>
+                <ul className={styles.clientList}>
+                    {filteredClients.map((client) => (
+                    <li key={client.id} className={styles.clientListItem}>
+                        <Link to={`/client/${client.id}`} className={styles.clientLink}>
+                        <AvatarPlaceholder name={client.name} size={50} />
+                        <div className={styles.clientInfo}>
+                            <span className={styles.clientName}>{client.name}</span>
+                            {/* Use API data - check if field exists */}
+                            {client.lastContact &&
+                                <span className={styles.lastContact}>Last Contact: {client.lastContact}</span>
+                            }
+                        </div>
+                        </Link>
+                    </li>
+                    ))}
+                </ul>
                 ) : (
-                    <p className={styles.noResults}>
-                        {searchTerm ? 'No clients match your search.' : 'No clients found.'}
-                    </p>
+                <p className={styles.noResults}>
+                    {error ? 'Could not load clients.' : (searchTerm ? 'No clients match your search.' : 'No clients added yet.')}
+                </p>
                 )}
-             </>
-          )}
-      </div>
-      {/* --- End Scrollable List Area --- */}
+            </>
+            )}
+        </div>
+        {/* --- End List Area --- */}
 
     </div> // Close .clientListPageContainer div
   );

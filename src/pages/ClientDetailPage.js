@@ -11,70 +11,63 @@ import Spinner from '../components/Spinner';
 import ActionSheet from '../components/ActionSheet';
 import BackButton from '../components/BackButton';
 import MoreOptionsButton from '../components/MoreOptionsButton';
-import AvatarPlaceholder from '../components/AvatarPlaceholder'; // Make sure this is imported
+import AvatarPlaceholder from '../components/AvatarPlaceholder';
+import apiClient from '../utils/apiClient'; // <-- Import API client
+import { useAuth } from '../context/AuthContext'; // <-- Import useAuth for logout on error
 
-// --- Dummy Data Section (Replace with API calls) ---
-const DUMMY_CLIENT_DETAILS = {
-  c1: { name: 'Aaron Smith', email: 'aaron.smith@example.com', phone: '555-1111' },
-  c2: { name: 'Betty Jones', email: 'betty.j@example.com', phone: '555-2222' },
-  c3: { name: 'Charles Williams', email: 'cwilliams@mail.com', phone: '555-3333' },
-  c4: { name: 'Diana Brown', email: 'diana.b@sample.net', phone: '555-4444' },
-  c5: { name: 'Edward Davis', email: 'ed.davis@domain.org', phone: '555-5555' },
-};
-
-// Add more notes to test scrolling
-const DUMMY_MEETING_NOTES = {
-  c1: [
-    { noteId: 'n101', date: '2023-10-26', summary: 'Portfolio Review, Risk Adjustment discussion.', nextSteps: 'Send updated risk profile form.' },
-    { noteId: 'n102', date: '2023-07-11', summary: 'Initial planning call. Discussed goals.', nextSteps: 'Gather financial documents.' },
-    { noteId: 'n103', date: '2023-05-01', summary: 'Market update call.', nextSteps: 'Monitor specific index.' },
-    { noteId: 'n104', date: '2023-02-15', summary: 'Tax planning session.', nextSteps: 'Client to provide accountant details.' },
-    { noteId: 'n105', date: '2022-12-01', summary: 'End of year review.', nextSteps: 'Prepare for next year.' },
-    { noteId: 'n106', date: '2022-10-05', summary: 'Check-in regarding previous action item.', nextSteps: 'Action completed.' },
-    { noteId: 'n107', date: '2022-08-20', summary: 'Discussion on alternative investments.', nextSteps: 'Provide research materials.' },
-  ],
-  c2: [
-    { noteId: 'n201', date: '2023-09-15', summary: 'Planning Call, Next Steps Defined.', nextSteps: 'Draft initial financial plan. Schedule follow-up.' },
-  ],
-  c3: [
-    { noteId: 'n301', date: '2023-11-01', summary: 'Quick check-in call.', nextSteps: 'None immediately.' },
-  ],
-};
-// --- End Dummy Data ---
-
+// --- REMOVED Dummy Data ---
 
 function ClientDetailPage() {
-  // State for data
-  const [client, setClient] = useState(null);
-  const [notes, setNotes] = useState([]);
+  // --- State ---
+  // Combined state for client details and their notes
+  const [clientData, setClientData] = useState(null);
 
-  // State for UI feedback & actions
+  // UI/Action States
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(''); // General page errors (fetch)
+  const [actionError, setActionError] = useState(''); // Errors specific to actions (delete)
   const [successMessage, setSuccessMessage] = useState('');
   const [isDeletingClient, setIsDeletingClient] = useState(false);
   const [isActionSheetOpen, setIsActionSheetOpen] = useState(false);
 
-  // Hooks
+  // --- Hooks ---
   const { clientId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const auth = useAuth(); // For potential logout on auth errors
 
   // --- Effect to Fetch Client Details and Notes ---
   useEffect(() => {
-    setIsLoading(true); setError(''); setSuccessMessage('');
-    console.log("Fetching data for client ID:", clientId);
-    // Simulate API Fetch
-    setTimeout(() => {
-      const clientDetails = DUMMY_CLIENT_DETAILS[clientId];
-      const clientNotes = DUMMY_MEETING_NOTES[clientId] || [];
-      if (clientDetails) {
-        setClient(clientDetails); setNotes(clientNotes); setIsLoading(false);
-      } else {
-        setError(`Client with ID ${clientId} not found.`); setIsLoading(false); console.error("Client not found:", clientId);
-      }
-    }, 500);
-  }, [clientId]);
+    const fetchClientData = async () => {
+        setIsLoading(true);
+        setError(''); // Clear general error
+        setActionError(''); // Clear action error
+        setSuccessMessage(''); // Clear success message
+        console.log(`ClientDetailPage: Fetching data for client ID: ${clientId}`);
+
+        try {
+            // Use apiClient to fetch combined client and notes data
+            const data = await apiClient(`/clients/${clientId}`); // GET /api/clients/:id
+            setClientData(data); // Includes client details and notes array
+            console.log("ClientDetailPage: Data fetched successfully", data);
+        } catch (err) {
+            console.error("ClientDetailPage: Failed to fetch client data:", err);
+            setError(err.message || 'Failed to load client details.'); // Set general error
+
+            // Handle token errors
+            if (err.status === 401 || err.status === 403) {
+                 console.log("ClientDetailPage: Auth error detected, logging out.");
+                 setTimeout(() => auth.logout(), 1500);
+            }
+            // If client specifically not found by API (404), setError handles it
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    fetchClientData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clientId]); // Re-run if clientId changes
 
   // --- Effect to Handle Incoming Success Messages ---
   useEffect(() => {
@@ -86,40 +79,54 @@ function ClientDetailPage() {
     }
   }, [location.state]);
 
+
   // --- Handlers ---
   const handleAddNote = () => navigate(`/client/${clientId}/add-note`);
 
-  const handleDeleteClient = () => {
-    if (!client || !window.confirm(`Are you sure you want to delete client ${client.name}? This will also delete all associated meeting notes and cannot be undone.`)) {
+  const handleDeleteClient = async () => { // <-- Make async
+    // Use clientData from state
+    if (!clientData || !window.confirm(`Are you sure you want to delete client ${clientData.name}? This will also delete all associated meeting notes and cannot be undone.`)) {
       handleCloseActionSheet(); return;
     }
-    setIsDeletingClient(true); setError(''); console.log(`Attempting to delete client ID: ${clientId}`);
-    // Simulate API Delete
-    setTimeout(() => {
-      try {
-        console.log('Client deleted successfully (Simulated)');
-        // TODO: Delete from dummy data
-        setIsDeletingClient(false);
-        navigate('/', { state: { message: `Client ${client.name} deleted successfully.` } });
-      } catch (apiError) {
-        console.error('Failed to delete client (Simulated):', apiError);
-        setError('Failed to delete client. Please try again.'); setIsDeletingClient(false); handleCloseActionSheet();
-      }
-    }, 1000);
+    setIsDeletingClient(true);
+    setActionError(''); // Clear previous action errors
+    console.log(`ClientDetailPage: Attempting to delete client ID: ${clientId}`);
+
+    try {
+        // Call API DELETE /api/clients/:id
+        await apiClient(`/clients/${clientId}`, 'DELETE');
+        console.log('ClientDetailPage: Client deleted successfully via API');
+        // No need for setIsDeletingClient(false) here, navigating away
+        // Navigate back to main client list with success message
+        navigate('/', { state: { message: `Client ${clientData.name} deleted successfully.` } });
+    } catch (err) {
+        console.error('ClientDetailPage: Failed to delete client:', err);
+        setActionError(err.message || 'Failed to delete client. Please try again.'); // Set action-specific error
+        setIsDeletingClient(false); // Stop loading on error
+        handleCloseActionSheet(); // Close sheet on error
+         // Handle token errors specifically
+        if (err.status === 401 || err.status === 403) {
+             console.log("ClientDetailPage: Auth error during delete, logging out.");
+             setTimeout(() => auth.logout(), 1500);
+        }
+    }
+     // No finally block needed for setIsDeletingClient as success navigates away
   };
 
   const handleOpenActionSheet = () => setIsActionSheetOpen(true);
   const handleCloseActionSheet = () => setIsActionSheetOpen(false);
 
   const handleEditClient = () => {
-      console.log("Navigating to edit client page:", `/client/${clientId}/edit`);
+      console.log("ClientDetailPage: Navigating to edit client page:", `/client/${clientId}/edit`);
       navigate(`/client/${clientId}/edit`);
   };
 
+  // Define actions for the ActionSheet component
   const sheetActions = [
     { label: 'Edit Client', onClick: () => { handleCloseActionSheet(); handleEditClient(); }, disabled: isDeletingClient },
     { label: 'Delete Client', onClick: handleDeleteClient, destructive: true, disabled: isDeletingClient },
   ];
+
 
   // --- Render Logic ---
   if (isLoading) {
@@ -130,8 +137,9 @@ function ClientDetailPage() {
         </div>
     );
   }
+  // Show general fetch error (if not actively trying to delete)
   if (error && !isDeletingClient) {
-     return ( // Wrap error for consistent layout
+     return (
        <div className={`${styles.clientDetailPageContainer} ${styles.errorContainer}`}>
           <div className={styles.fixedContent}> <BackButton to="/" label="Clients" /> </div>
           <div className={styles.scrollContentCentered}>
@@ -140,8 +148,9 @@ function ClientDetailPage() {
        </div>
      );
   }
-  if (!client && !isLoading) {
-    return ( // Wrap fallback error
+  // Fallback if loading finished but data is still null (should be caught by error usually)
+  if (!clientData && !isLoading) {
+    return (
        <div className={`${styles.clientDetailPageContainer} ${styles.errorContainer}`}>
            <div className={styles.fixedContent}> <BackButton to="/" label="Clients" /> </div>
             <div className={styles.scrollContentCentered}>
@@ -151,7 +160,8 @@ function ClientDetailPage() {
     );
   }
 
-  // --- Main Page Content ---
+
+  // --- Main Page Content (Requires clientData to exist) ---
   return (
     <div className={styles.clientDetailPageContainer}>
 
@@ -162,27 +172,28 @@ function ClientDetailPage() {
 
             {/* Flash Success Message */}
             {successMessage && (<div className={styles.successMessage}>{successMessage}</div>)}
-            {/* Delete Error Message */}
-            {error && isDeletingClient && (<div className={styles.inlineError}>{error}</div>)}
+            {/* Action-specific Error Message (e.g., delete failure) */}
+            {actionError && (<div className={styles.inlineError}>{actionError}</div>)}
 
             {/* Client Header */}
             <div className={styles.clientHeader}>
-                {client && (
+                 {/* Check clientData before rendering */}
+                {clientData && (
                 <>
                     <div className={styles.avatarContainer}>
-                        <AvatarPlaceholder name={client.name} size={60} />
+                        <AvatarPlaceholder name={clientData.name} size={60} />
                     </div>
                     <div className={styles.headerContent}>
-                        <h2>{client.name}</h2>
+                        <h2>{clientData.name}</h2>
                         <div className={styles.contactInfo}>
-                            {client.email && <span>Email: {client.email}</span>}
-                            {client.phone && <span>Phone: {client.phone}</span>}
+                            {clientData.email && <span>Email: {clientData.email}</span>}
+                            {clientData.phone && <span>Phone: {clientData.phone}</span>}
                         </div>
                     </div>
                     <div className={styles.headerActions}>
                         <MoreOptionsButton
                             onClick={handleOpenActionSheet}
-                            disabled={!client || isDeletingClient}
+                            disabled={!clientData || isDeletingClient}
                             ariaLabel="More client options"
                         />
                     </div>
@@ -191,10 +202,10 @@ function ClientDetailPage() {
             </div>
 
             {/* Add Note Button */}
-            {client && (
+            {clientData && (
                 <div className={styles.actions}>
                     <button onClick={handleAddNote} className={styles.addNoteButton}>
-                        + Add New Meeting Note for {client.name}
+                        + Add New Meeting Note for {clientData.name}
                     </button>
                 </div>
             )}
@@ -208,24 +219,33 @@ function ClientDetailPage() {
 
         {/* Scrollable Notes Area */}
         <div className={styles.notesScrollArea}>
-            {/* Removed notesSection div wrapper, header moved to fixed */}
-            {notes.length > 0 ? (
-            <ul className={styles.notesList}>
-                {notes.map((note) => (
+            {/* Check clientData and clientData.notes before rendering */}
+            {clientData && clientData.notes && clientData.notes.length > 0 ? (
+    <ul className={styles.notesList}>
+        {clientData.notes.map((note) => {
+            // --- ADD THIS LOG ---
+            console.log("ClientDetailPage - Mapping Note:", note);
+            // --- END LOG ---
+            return (
                 <li key={note.noteId} className={styles.noteItem}>
+                    {/* Check the value of note.noteId used below */}
                     <Link to={`/client/${clientId}/note/${note.noteId}`} className={styles.noteLink}>
                         <div className={styles.noteDate}>{note.date}</div>
                         <div className={styles.noteSummary}>{note.summary}</div>
                     </Link>
                 </li>
-                ))}
-            </ul>
-            ) : ( <p className={styles.noResults}>No meeting notes recorded yet.</p> )}
+            );
+        })}
+    </ul>
+) : (
+                 // Show message only if not loading and no error occurred
+                 !isLoading && !error && <p className={styles.noResults}>No meeting notes recorded yet.</p>
+            )}
         </div>
         {/* End Scrollable Notes Area */}
 
 
-      {/* Action Sheet (Positioned Fixed) */}
+      {/* Action Sheet */}
       <ActionSheet
         isOpen={isActionSheetOpen}
         onClose={handleCloseActionSheet}

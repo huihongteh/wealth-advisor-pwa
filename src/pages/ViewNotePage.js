@@ -4,52 +4,82 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import styles from './ViewNotePage.module.css';
 import Spinner from '../components/Spinner';
 import ActionSheet from '../components/ActionSheet';
-import BackButton from '../components/BackButton'; // <-- Import BackButton
-import MoreOptionsButton from '../components/MoreOptionsButton'; // <-- Import MoreOptionsButton
+import BackButton from '../components/BackButton';
+import MoreOptionsButton from '../components/MoreOptionsButton';
+import apiClient from '../utils/apiClient'; // <-- Import API client
+import { useAuth } from '../context/AuthContext'; // <-- Import useAuth for error handling
 
-// --- Dummy Data Section ---
-const DUMMY_CLIENT_DETAILS = {
-  c1: { name: 'Aaron Smith' }, c2: { name: 'Betty Jones' }, c3: { name: 'Charles Williams' },
-  c4: { name: 'Diana Brown' }, c5: { name: 'Edward Davis' },
-};
-const DUMMY_MEETING_NOTES = {
-  c1: [ { noteId: 'n101', date: '2023-10-26', summary: 'Portfolio Review, Risk Adjustment discussion.', nextSteps: 'Send updated risk profile form.' }, { noteId: 'n102', date: '2023-07-11', summary: 'Initial planning call. Discussed goals.', nextSteps: 'Gather financial documents.' }, ],
-  c2: [ { noteId: 'n201', date: '2023-09-15', summary: 'Planning Call, Next Steps Defined.', nextSteps: 'Draft initial financial plan. Schedule follow-up.' }, ],
-  c3: [ { noteId: 'n301', date: '2023-11-01', summary: 'Quick check-in call.', nextSteps: 'None immediately.' }, ],
-};
-// --- End Dummy Data ---
+// --- REMOVED Dummy Data ---
 
 function ViewNotePage() {
-  // State
-  const [note, setNote] = useState(null);
-  const [clientName, setClientName] = useState('');
+  // --- State ---
+  const [note, setNote] = useState(null); // State to hold the fetched note
+  const [clientName, setClientName] = useState(''); // Keep client name for context (can fetch separately or pass)
+
+  // UI/Action States
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(''); // General page fetch error
+  const [actionError, setActionError] = useState(''); // Specific delete error
   const [isDeleting, setIsDeleting] = useState(false);
   const [isActionSheetOpen, setIsActionSheetOpen] = useState(false);
-  const [successMessage, setSuccessMessage] = useState(''); // For update message
+  const [successMessage, setSuccessMessage] = useState(''); // For messages from Edit page
 
-  // Hooks
+  // --- Hooks ---
   const { clientId, noteId } = useParams();
   const navigate = useNavigate();
-  const location = useLocation(); // To receive update message
+  const location = useLocation(); // To receive success message
+  const auth = useAuth(); // For potential logout
 
-  // --- Effect to Fetch Note Details ---
+  console.log("ViewNotePage Params:", { clientId, noteId });
+
+  // --- Effect to Fetch Specific Note Details ---
   useEffect(() => {
-    setIsLoading(true); setError(''); setSuccessMessage('');
-    console.log(`Fetching note ID: ${noteId} for client ID: ${clientId}`);
-    // Simulate API Fetch
-    setTimeout(() => {
-      const client = DUMMY_CLIENT_DETAILS[clientId];
-      const clientNotes = DUMMY_MEETING_NOTES[clientId] || [];
-      const foundNote = clientNotes.find(n => n.noteId === noteId);
-      if (client && foundNote) {
-        setNote(foundNote); setClientName(client.name); setIsLoading(false);
-      } else {
-        setError(`Meeting note with ID ${noteId} for client ${clientId} not found.`); setIsLoading(false); console.error("Note or client not found:", clientId, noteId);
-      }
-    }, 500);
-  }, [clientId, noteId]);
+    const fetchNote = async () => {
+        setIsLoading(true);
+        setError('');
+        setActionError('');
+        setSuccessMessage(''); // Clear messages on load
+        console.log(`ViewNotePage: Fetching note ID: ${noteId} for client ID: ${clientId}`);
+
+        try {
+            // Fetch the specific note
+            const noteData = await apiClient(`/clients/${clientId}/notes/${noteId}`); // GET /api/clients/:clientId/notes/:noteId
+            setNote(noteData);
+            console.log("ViewNotePage: Note fetched successfully", noteData);
+
+            // Optional: Fetch client name if not passed via state (less efficient but simple)
+            // Alternatively, pass clientName via route state when navigating from ClientDetailPage
+            try {
+                const clientDetails = await apiClient(`/clients/${clientId}`); // Fetch client details too
+                setClientName(clientDetails?.name || `Client ${clientId}`);
+            } catch (clientError) {
+                 console.warn("ViewNotePage: Could not fetch client name for context", clientError);
+                 setClientName(`Client ${clientId}`); // Fallback name
+            }
+
+        } catch (err) {
+            console.error("ViewNotePage: Failed to fetch note:", err);
+            setError(err.message || 'Failed to load note details.'); // Set general fetch error
+
+            // Handle token errors
+            if (err.status === 401 || err.status === 403) {
+                 console.log("ViewNotePage: Auth error detected, logging out.");
+                 setTimeout(() => auth.logout(), 1500);
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Ensure IDs are valid before fetching
+    if (clientId && noteId) {
+        fetchNote();
+    } else {
+        setError("Invalid Client or Note ID in URL.");
+        setIsLoading(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clientId, noteId]); // Re-run if IDs change
 
   // --- Effect to Handle Incoming Success Messages (from editing) ---
   useEffect(() => {
@@ -61,32 +91,40 @@ function ViewNotePage() {
     }
   }, [location.state]);
 
+
   // --- Handlers ---
   const handleEdit = () => {
-    console.log("Navigating to edit page:", `/client/${clientId}/note/${noteId}/edit`);
     navigate(`/client/${clientId}/note/${noteId}/edit`);
   };
 
-  const handleDeleteNote = () => {
+  const handleDeleteNote = async () => { // <-- Make async
     if (!note || !window.confirm(`Are you sure you want to delete this note from ${note.date}? This action cannot be undone.`)) {
       handleCloseActionSheet(); return;
     }
-    setIsDeleting(true); setError('');
-    console.log(`Attempting to delete note ID: ${noteId} for client ID: ${clientId}`);
-    // Simulate API Delete
-    setTimeout(() => {
-      try {
-        console.log('Note deleted successfully (Simulated)');
-        // TODO: Delete from dummy data if needed
-        // const noteIndex = DUMMY_MEETING_NOTES[clientId]?.findIndex(n => n.noteId === noteId);
-        // if (noteIndex > -1) DUMMY_MEETING_NOTES[clientId].splice(noteIndex, 1);
-        setIsDeleting(false);
-        navigate(`/client/${clientId}`, { replace: true, state: { message: 'Note deleted successfully.' } });
-      } catch (apiError) {
-        console.error('Failed to delete note (Simulated):', apiError);
-        setError('Failed to delete note. Please try again.'); setIsDeleting(false); handleCloseActionSheet();
-      }
-    }, 1000);
+    setIsDeleting(true);
+    setActionError(''); // Clear previous action error
+    console.log(`ViewNotePage: Attempting to delete note ID: ${noteId} for client ID: ${clientId}`);
+
+    try {
+        // Call API DELETE /api/clients/:clientId/notes/:noteId
+        await apiClient(`/clients/${clientId}/notes/${noteId}`, 'DELETE');
+        console.log('ViewNotePage: Note deleted successfully via API');
+        // No need for setIsDeleting(false), navigating away
+        navigate(
+            `/client/${clientId}`, // Navigate back to client detail
+            { replace: true, state: { message: 'Note deleted successfully.' } }
+        );
+    } catch (err) {
+        console.error('ViewNotePage: Failed to delete note:', err);
+        setActionError(err.message || 'Failed to delete note. Please try again.'); // Set action-specific error
+        setIsDeleting(false); // Stop loading on error
+        handleCloseActionSheet(); // Close sheet on error
+        // Handle token errors specifically
+        if (err.status === 401 || err.status === 403) {
+             console.log("ViewNotePage: Auth error during delete, logging out.");
+             setTimeout(() => auth.logout(), 1500);
+        }
+    }
   };
 
   const handleOpenActionSheet = () => setIsActionSheetOpen(true);
@@ -99,30 +137,49 @@ function ViewNotePage() {
     ];
 
   // --- Render Logic ---
-  if (isLoading) { return <Spinner />; }
-
+  if (isLoading) {
+    return ( // Wrap spinner for consistent layout
+        <div className={styles.viewNotePageContainer}> {/* Use container class */}
+            <div className={styles.fixedContent}> {/* Consistent wrapper */}
+                <BackButton to={clientId ? `/client/${clientId}` : '/'} label="Client Details" />
+            </div>
+            <div className={styles.scrollContentCentered}> <Spinner /> </div>
+        </div>
+    );
+  }
+  // Show general fetch error (if not deleting)
   if (error && !isDeleting) {
     return (
-      <div className={`${styles.viewNotePage} ${styles.errorContainer}`}>
-        <BackButton to={clientId ? `/client/${clientId}` : '/'} label="Back" /> {/* Use BackButton */}
-        <div className={styles.error}> <strong>Error Loading Note</strong> <p>{error}</p> </div>
+      <div className={`${styles.viewNotePageContainer} ${styles.errorContainer}`}>
+        <div className={styles.fixedContent}>
+            <BackButton to={clientId ? `/client/${clientId}` : '/'} label="Client Details" />
+        </div>
+        <div className={styles.scrollContentCentered}>
+            <div className={styles.error}> <strong>Error Loading Note</strong> <p>{error}</p> </div>
+        </div>
       </div>
     );
   }
+  // Fallback if loading done but note still null
   if (!note && !isLoading) {
     return (
-      <div className={`${styles.viewNotePage} ${styles.errorContainer}`}>
-         <BackButton to={clientId ? `/client/${clientId}` : '/'} label="Back" /> {/* Use BackButton */}
-         <div className={styles.error}> <p>Note data could not be found.</p> </div>
+      <div className={`${styles.viewNotePageContainer} ${styles.errorContainer}`}>
+         <div className={styles.fixedContent}>
+             <BackButton to={clientId ? `/client/${clientId}` : '/'} label="Client Details" />
+         </div>
+         <div className={styles.scrollContentCentered}>
+             <div className={styles.error}> <p>Note data could not be found.</p> </div>
+         </div>
       </div>
     );
   }
 
   // --- Main Page Content ---
   return (
+    // Use container for potential future layout adjustments if needed
     <div className={styles.viewNotePage}>
 
-      {/* --- Use BackButton Component --- */}
+      {/* Use BackButton Component */}
       <BackButton to={`/client/${clientId}`} label="Client Details" />
 
       {/* Display Flash Success Message */}
@@ -131,21 +188,20 @@ function ViewNotePage() {
       {/* Header Section */}
       <div className={styles.header}>
         <div className={styles.headerInfo}>
-            <h2>Meeting Note: {note ? note.date : '...'}</h2>
+            <h2>Meeting Note: {note ? note.date : '...'}</h2> {/* Use API date format */}
             <div className={styles.clientContext}>Client: {clientName || '...'}</div>
         </div>
         <div className={styles.headerActions}>
-             {/* --- Use MoreOptionsButton Component --- */}
              <MoreOptionsButton
                 onClick={handleOpenActionSheet}
-                disabled={!note || isDeleting}
+                disabled={!note || isDeleting} // Disable if no note or deleting
                 ariaLabel="More note options"
              />
         </div>
       </div>
 
-      {/* Display delete error specifically */}
-       {error && isDeleting && (<div className={styles.inlineError}>{error}</div>)}
+      {/* Display action error specifically if it occurred */}
+       {actionError && (<div className={styles.inlineError}>{actionError}</div>)}
 
       {/* Note Content */}
       {note ? (
@@ -159,15 +215,19 @@ function ViewNotePage() {
             <p style={{ whiteSpace: 'pre-wrap' }}> {note.nextSteps || <em>No next steps recorded.</em>} </p>
           </div>
         </div>
-      ) : ( <Spinner/> ) }
+      ) : (
+         // Should be handled by loading/error states, but added spinner as fallback
+         <div style={{padding: '40px', textAlign: 'center'}}><Spinner /></div>
+      )}
 
-      {/* --- Action Sheet Component --- */}
+
+      {/* Action Sheet Component */}
       <ActionSheet
         isOpen={isActionSheetOpen}
         onClose={handleCloseActionSheet}
         actions={sheetActions}
       />
-    </div>
+    </div> // End .viewNotePage div
   );
 }
 export default ViewNotePage;
