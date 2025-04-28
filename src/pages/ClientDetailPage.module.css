@@ -4,17 +4,17 @@
 .clientDetailPageContainer {
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 60px - env(safe-area-inset-bottom)); /* Adjust if nav height differs */
+    height: calc(100vh - 60px - env(safe-area-inset-bottom)); /* Adjust 60px if nav bar height changes */
     overflow: hidden;
-    background-color: #ffffff;
+    background-color: #ffffff; /* Overall page background */
   }
   
   /* Wrapper for non-scrolling content */
   .fixedContent {
       flex-shrink: 0;
       padding: 0 16px; /* Consistent horizontal padding */
-      /* background-color: #ffffff; Optional background if needed */
-      padding-top: 5px; /* Reduced top padding */
+      padding-top: 5px; /* Space for BackButton */
+      /* background-color: #ffffff; /* Optional: Can give fixed content its own background */
   }
   
   /* Centering wrapper for loading/error states */
@@ -24,13 +24,14 @@
       justify-content: center;
       align-items: center;
       padding: 20px;
-      overflow-y: auto;
+      overflow-y: auto; /* Allow scroll if error message is huge */
   }
+  .errorContainer {} /* Can likely be removed */
   
   /* Error and Success Message Styling */
-  .error {
+  .error { /* Error block style */
       text-align: center;
-      padding: 20px;
+      padding: 20px; /* Reduced padding */
       margin: 0 auto;
       max-width: 600px;
       border: 1px solid #f5c6cb;
@@ -39,10 +40,10 @@
       border-radius: 8px;
   }
   .error strong { display: block; margin-bottom: 8px; font-size: 1.05em; }
-  .error p { margin-bottom: 15px; }
-  /* Error link uses BackButton now */
+  .error p { margin-bottom: 15px; margin-top: 0; }
+  /* Link styling handled by BackButton component */
   
-  .inlineError {
+  .inlineError { /* For action-specific errors like delete */
       color: #dc3545; background-color: #f8d7da; border: 1px solid #f5c6cb;
       border-radius: 6px; padding: 10px 16px; margin-bottom: 15px;
       text-align: center; font-size: 0.9em;
@@ -56,26 +57,26 @@
   /* Header Styles */
   .clientHeader {
       display: flex;
-      align-items: center;
-      padding: 15px 0;
+      align-items: center; /* Vertically center */
+      padding: 15px 0; /* Vertical padding only */
       border-bottom: 0.5px solid #e5e7e8; /* Subtle separator */
-      margin-top: 10px;
+      margin-top: 10px; /* Space below BackButton/messages */
       margin-bottom: 20px;
-      gap: 15px; /* Adjusted gap */
+      gap: 15px;
   }
   .avatarContainer { flex-shrink: 0; }
   .headerContent { flex-grow: 1; }
   .headerContent h2 {
     margin-top: 0; margin-bottom: 3px; font-size: 1.5rem; font-weight: 600; color: #000000;
   }
-  .contactInfo { font-size: 0.9rem; color: #8e8e93; }
+  .contactInfo { font-size: 0.9rem; color: #8e8e93; /* iOS secondary grey */}
   .contactInfo span { margin-right: 10px; display: inline-block; margin-top: 4px; }
   .headerActions { flex-shrink: 0; }
   
   /* Add Note Button Styles */
   .actions { margin-bottom: 15px; flex-shrink: 0; }
   .addNoteButton {
-    display: inline-block; /* Or block if full width */
+    display: inline-block;
     padding: 10px 18px; background-color: #007aff; color: white; border: none;
     border-radius: 8px; font-size: 1rem; font-weight: 500; cursor: pointer;
     transition: background-color 0.2s ease;
@@ -84,15 +85,12 @@
   
   /* Fixed Notes List Header */
   .notesSectionHeader {
-      padding: 10px 0 8px 0; /* Adjust padding */
-      margin-bottom: 0; /* No margin below header */
+      padding: 10px 0 8px 0; /* Vertical padding */
+      margin-bottom: 0;
       border-bottom: 0.5px solid #e5e7e8;
       flex-shrink: 0;
-      background-color: #f8f9fa; /* Slight background for header */
-      margin-left: -16px; /* Extend background bleed */
-      margin-right: -16px;
-      padding-left: 16px; /* Re-apply padding */
-      padding-right: 16px;
+      /* Background for header can blend with list scroll area now */
+      /* background-color: #f8f9fa; */
   }
   .notesSectionHeader h3 {
       font-size: 1.1rem; font-weight: 600; color: #000000; margin: 0;
@@ -103,10 +101,14 @@
       flex-grow: 1;
       overflow-y: auto;
       overflow-x: hidden;
-      padding: 0 0 20px 0; /* Only bottom padding */
+      /* --- ADDED horizontal padding --- */
+      padding: 0 16px 20px 16px; /* Match horizontal padding of fixed content */
       -webkit-overflow-scrolling: touch;
       background-color: #ffffff;
   }
+  
+  /* Notes Section Container (if needed inside scroll, but likely not) */
+  .notesSection { margin-top: 10px; } /* Add space above list inside scroll area */
   
   /* Notes List Styles */
   .notesList { list-style: none; padding: 0; margin: 0; }
@@ -115,22 +117,46 @@
       transition: background-color 0.2s ease;
   }
   .noteItem:last-child { border-bottom: none; }
-  .noteItem:hover { background-color: #f0f2f5; }
+  .noteItem:hover { background-color: #f0f2f5; /* Subtle hover */ }
   .noteLink {
-      display: flex; /* Use flex for layout */
-      flex-direction: column; /* Stack date and summary */
-      padding: 10px 16px; /* Consistent padding */
+      display: block; /* Block link */
+      padding: 12px 0px; /* Vertical padding only, horizontal comes from parent */
       text-decoration: none; color: inherit;
   }
   .noteDate {
-      font-weight: 400; /* Regular weight */
-      margin-bottom: 3px; color: #000000; /* Black */
-      font-size: 1rem; /* Regular size */
+      font-weight: 400; margin-bottom: 3px; color: #000000; font-size: 1rem;
   }
   .noteSummary {
-      font-size: 0.9rem; color: #8e8e93; /* Secondary grey */
-      line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      font-size: 0.9rem; color: #8e8e93; line-height: 1.4; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis;
   }
-  .noResults {
-      text-align: center; color: #8e8e93; margin-top: 30px; padding: 20px; font-style: italic;
+  
+  /* Empty State / No Results Styling (Inside Scroll Area) */
+  .noResults,
+  .emptyStateContainerNotes {
+      text-align: center;
+      color: #8e8e93; /* Match secondary text */
+      margin-top: 30px; /* Space from header above */
+      padding: 20px 0; /* Vertical padding */
+      font-style: italic;
+      font-size: 0.95rem;
   }
+  .emptyStateContainerNotes { /* Specific styles if different from .noResults */
+      font-style: normal; /* Remove italic if needed */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+  }
+  .emptyStateContainerNotes .emptyIcon {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      opacity: 0.6;
+  }
+  .emptyStateContainerNotes p {
+      font-size: 1rem;
+      line-height: 1.5;
+      margin-bottom: 0; /* Remove margin if no button below */
+  }
+  /* Style for potential button inside empty state */
+  /* .emptyStateContainerNotes .emptyStateButton { ... } */

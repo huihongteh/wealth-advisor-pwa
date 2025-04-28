@@ -2,13 +2,15 @@
 
 .addNotePage {
   max-width: 700px;
-  margin: 0 auto 20px auto;
+  margin: 0 auto 20px auto; /* Center container, top margin handled by BackButton */
   padding: 0 20px 20px 20px;
+  box-sizing: border-box;
+  /* REMOVE text-align: center; from here if it exists */
 }
 
 /* Header Styles */
 .addNotePage h2 {
-  text-align: center;
+  text-align: center; /* Centering the H2 title itself is FINE */
   font-size: 1.6rem;
   font-weight: 600;
   margin-top: 15px;
@@ -16,7 +18,7 @@
   color: #1c1e21;
 }
 .clientContext {
-    text-align: center;
+    text-align: center; /* Centering this context line is also FINE */
     margin-bottom: 30px;
     font-size: 1rem;
     color: #657786;
@@ -26,55 +28,63 @@
 .noteForm {
   display: flex;
   flex-direction: column;
+  /* Ensure NO text-align: center; here */
+  /* Ensure NO margin: 0 auto; that would center the form block itself if width constrained */
 }
+
 .formGroup {
   margin-bottom: 20px;
+  text-align: left; /* Explicitly set or rely on default */
 }
+
 .formGroup label {
   display: block;
   margin-bottom: 6px;
   font-weight: 500;
   font-size: 0.95rem;
   color: #555;
+  text-align: left; /* Explicitly set or rely on default */
 }
+
 .formGroup input[type="date"],
 .formGroup textarea {
-  width: 100%;
-  padding: 12px 15px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  box-sizing: border-box;
-  font-size: 1rem;
-  font-family: inherit;
-  background-color: #f8f9fa;
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 1rem;
+    font-family: inherit;
+    background-color: #f8f9fa;
+    text-align: left; /* Explicitly set or rely on default */
 }
 .formGroup textarea {
     line-height: 1.5;
 }
 .formGroup input:focus,
 .formGroup textarea:focus {
-  border-color: #007bff;
-  background-color: #ffffff;
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+    border-color: #007bff;
+    background-color: #ffffff;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
 }
 
-/* Error Message */
+/* Error Message Styles */
 .errorMessage {
     color: #721c24;
     background-color: #f8d7da;
     border: 1px solid #f5c6cb;
     border-radius: 4px;
     padding: 10px 15px;
-    margin-bottom: 20px;
-    text-align: center;
+    margin-bottom: 20px; /* Adjusted margin */
+    text-align: center; /* Centering error message text is OK */
     font-size: 0.9em;
 }
 
 /* Form Actions */
 .formActions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-end; /* Align button(s) to the right */
   gap: 15px;
   margin-top: 15px;
   padding-top: 20px;
@@ -83,13 +93,13 @@
 .button {
   padding: 10px 20px;
   border: none;
-  border-radius: 6px; /* Consistent radius */
+  border-radius: 6px;
   font-size: 1rem;
-  font-weight: 600; /* Bold */
+  font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s ease, opacity 0.2s ease;
 }
-.saveButton {
+.saveButton { /* Keep specific save button styles */
   background-color: #28a745; /* Green for Add */
   color: white;
 }
@@ -99,4 +109,18 @@
 .button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* Top Back/Cancel Link Styles */
+/* Ensure these are not affected by text-align:center on parent */
+.backLinkTopContainer {
+    margin-bottom: 15px;
+    text-align: left; /* Ensure back link container aligns left */
+}
+.backLinkTop {
+    display: inline-block; /* Keep inline-block */
+}
+/* Add hover state if missing */
+.backLinkTop:hover {
+    text-decoration: underline;
 }

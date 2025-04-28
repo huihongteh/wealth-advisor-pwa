@@ -65,22 +65,31 @@ router.post('/', async (req, res) => {
   // Simple validation - could use a library like express-validator later
   const { name, email, phone } = req.body;
   const advisorId = req.user.userId; // <-- Get advisor ID
-  if (!name) {
-    return res.status(400).json({ error: 'Client Name is required' });
-  }
+
+  if (!name || !phone) { // Name and Phone are now required
+    return res.status(400).json({ message: 'Client Name and Phone Number are required' });
+}
 
   try {
-    // Include advisor_id in the INSERT
     const result = await db.query(
       'INSERT INTO clients (name, email, phone, advisor_id) VALUES ($1, $2, $3, $4) RETURNING id, name, email, phone',
-      [name.trim(), email ? email.trim() : null, phone ? phone.trim() : null, advisorId] // <-- Ensure these parameters ($2, $3) match the query order
+      [
+          name.trim(),
+          email ? email.trim() : null, // Email is still optional
+          phone.trim(), // Phone is required, pass trimmed value
+          advisorId
+      ]
     );
-    res.status(201).json(result.rows[0]); // Return the newly created client data
+    res.status(201).json(result.rows[0]);
   } catch (err) {
     console.error('Error creating client:', err.stack);
     // Handle potential unique constraint violation for email
-    if (err.code === '23505' && err.constraint === 'clients_email_key') {
-         return res.status(409).json({ error: 'Email address already exists.' }); // 409 Conflict
+    if (err.code === '23505' && err.constraint === 'clients_phone_key') {
+      return res.status(409).json({ message: 'Phone number already exists for another client.' });
+ }
+    // Check for NOT NULL violation specifically on phone (less likely if validation works)
+    if (err.code === '23502' && err.column === 'phone') {
+          return res.status(400).json({ message: 'Phone number cannot be empty.' });
     }
     res.status(500).json({ error: 'Internal Server Error', details: err.message });
   }
@@ -92,15 +101,21 @@ router.put('/:id', async (req, res) => {
   const { name, email, phone } = req.body;
   const advisorId = req.user.userId; // <-- Get advisor ID
 
-  if (!name) { // Keep basic validation
-    return res.status(400).json({ error: 'Client Name is required' });
-  }
+  if (!name || !phone) { // Name and Phone are required
+    return res.status(400).json({ message: 'Client Name and Phone Number are required' });
+}
 
   try {
     // The trigger will automatically update 'updated_at'
     const result = await db.query(
       'UPDATE clients SET name = $1, email = $2, phone = $3 WHERE id = $4 AND advisor_id = $5 RETURNING id, name, email, phone, updated_at',
-      [name.trim(), email ? email.trim() : null, phone ? phone.trim() : null, id, advisorId]
+      [
+          name.trim(),
+          email ? email.trim() : null, // Email still optional
+          phone.trim(), // Phone required
+          id,
+          advisorId
+      ]
     );
 
     if (result.rows.length === 0) {
@@ -110,9 +125,13 @@ router.put('/:id', async (req, res) => {
   } catch (err) {
     console.error(`Error updating client ${id}:`, err.stack);
      // Handle potential unique constraint violation for email
-    if (err.code === '23505' && err.constraint === 'clients_email_key') {
-         return res.status(409).json({ error: 'Email address already exists for another client.' }); // 409 Conflict
-    }
+     if (err.code === '23505' && err.constraint === 'clients_phone_key') {
+      return res.status(409).json({ message: 'Phone number already exists for another client.' });
+ }
+  // Check for NOT NULL violation specifically on phone (less likely if validation works)
+ if (err.code === '23502' && err.column === 'phone') {
+      return res.status(400).json({ message: 'Phone number cannot be empty.' });
+ }
     res.status(500).json({ error: 'Internal Server Error', details: err.message });
   }
 });

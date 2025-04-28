@@ -2,13 +2,31 @@
 
 .addClientPage {
   max-width: 600px;
-  margin: 0 auto 20px auto;
-  padding: 0 20px 20px 20px;
+  margin: 0 auto 20px auto; /* Center container, top margin from BackButton */
+  padding: 0 20px 20px 20px; /* Horizontal/bottom padding */
+  box-sizing: border-box;
+  background-color: #ffffff;
+}
+
+/* Top Back/Cancel Link Styles */
+.backLinkTopContainer {
+    margin-bottom: 15px;
+    text-align: left; /* Ensure left alignment */
+}
+.backLinkTop {
+    display: inline-block;
+    text-decoration: none;
+    color: #007aff;
+    font-size: 1rem;
+    padding: 5px 0;
+}
+.backLinkTop:hover {
+    text-decoration: underline;
 }
 
 /* Header */
 .addClientPage h2 {
-  text-align: center;
+  text-align: center; /* Center title */
   font-size: 1.6rem;
   font-weight: 600;
   margin-top: 15px;
@@ -20,9 +38,11 @@
 .clientForm {
   display: flex;
   flex-direction: column;
+  /* No text-align: center here */
 }
 .formGroup {
   margin-bottom: 20px;
+  text-align: left; /* Default/ensure left align */
 }
 .formGroup label {
   display: block;
@@ -41,6 +61,7 @@
   box-sizing: border-box;
   font-size: 1rem;
   background-color: #f8f9fa;
+  text-align: left; /* Default/ensure left align */
 }
 .formGroup input:focus {
   border-color: #007bff;
@@ -57,14 +78,14 @@
     border-radius: 4px;
     padding: 10px 15px;
     margin-bottom: 20px;
-    text-align: center;
+    text-align: center; /* Center text within error message is OK */
     font-size: 0.9em;
 }
 
 /* Form Actions */
 .formActions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-end; /* Align button(s) to the right */
   gap: 15px;
   margin-top: 15px;
   padding-top: 20px;
@@ -79,8 +100,8 @@
   cursor: pointer;
   transition: background-color 0.2s ease, opacity 0.2s ease;
 }
-.saveButton {
-  background-color: #28a745; /* Green for Add */
+.saveButton { /* Green for Add */
+  background-color: #28a745;
   color: white;
 }
 .saveButton:hover:not(:disabled) {
