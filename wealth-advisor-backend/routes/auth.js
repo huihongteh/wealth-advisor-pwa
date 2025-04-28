@@ -5,6 +5,54 @@ const db = require('../config/db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+// --- POST /api/auth/register ---
+router.post('/register', async (req, res) => {
+    const { name, email, password } = req.body;
+
+    // --- Basic Input Validation ---
+    if (!name || !email || !password) {
+        return res.status(400).json({ error: 'Name, email, and password are required' });
+    }
+    // Add more validation: email format, password strength (e.g., min length)
+    if (password.length < 6) { // Example: Minimum password length
+         return res.status(400).json({ error: 'Password must be at least 6 characters long' });
+    }
+    // Add simple email format check (more robust needed for production)
+    if (!/\S+@\S+\.\S+/.test(email)) {
+         return res.status(400).json({ error: 'Invalid email format' });
+    }
+    // --- End Validation ---
+
+    try {
+        // 1. Check if email already exists
+        const existingUser = await db.query('SELECT id FROM advisors WHERE email = $1', [email.toLowerCase()]); // Check lowercase email
+        if (existingUser.rows.length > 0) {
+            return res.status(409).json({ error: 'Email address is already registered' }); // 409 Conflict
+        }
+
+        // 2. Hash the password
+        const saltRounds = 10;
+        const passwordHash = await bcrypt.hash(password, saltRounds);
+
+        // 3. Insert the new advisor
+        // Use lowercased email for storage consistency
+        const result = await db.query(
+            'INSERT INTO advisors (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, email, name',
+            [name.trim(), email.toLowerCase().trim(), passwordHash]
+        );
+
+        const newUser = result.rows[0];
+        console.log('New advisor registered:', newUser);
+
+        // 4. Send Success Response (Option A: Message only)
+        res.status(201).json({ message: 'Registration successful. Please log in.' });
+
+    } catch (err) {
+        console.error('Registration error:', err.stack);
+        res.status(500).json({ error: 'Internal Server Error during registration', details: err.message });
+    }
+});
+
 // --- POST /api/auth/login ---
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;

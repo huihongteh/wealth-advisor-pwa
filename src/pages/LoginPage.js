@@ -1,17 +1,30 @@
 // src/pages/LoginPage.js
-import React, { useState } from 'react';
-// Remove useNavigate if only relying on App.js Navigate component
-// import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext'; // Import useAuth
-import styles from './LoginPage.module.css';
+import React, { useState, useEffect } from 'react'; // <-- Add useEffect
+import { useAuth } from '../context/AuthContext';
 import apiClient from '../utils/apiClient';
+import styles from './LoginPage.module.css';
+import { Link, useLocation } from 'react-router-dom'; // <-- Add Link, useLocation
 
 function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState(''); 
   const auth = useAuth();
+  const location = useLocation();
+
+  // --- Effect to handle incoming messages ---
+  useEffect(() => {
+    if (location.state?.message) {
+      setSuccessMessage(location.state.message);
+      // Clear message after showing it
+      const timer = setTimeout(() => setSuccessMessage(''), 5000);
+      // Clear the state from history so message doesn't reappear
+      window.history.replaceState({}, document.title);
+      return () => clearTimeout(timer);
+    }
+  }, [location.state]); // Depend on location.state
 
   const handleSubmit = async (event) => { // Keep async
       event.preventDefault();
@@ -48,6 +61,12 @@ function LoginPage() {
   return (
       <div className={styles.loginContainer}>
           <h2>Login</h2>
+
+          {/* --- Display Success Message --- */}
+          {successMessage && (
+            <p className={styles.successMessage}>{successMessage}</p> // <-- Add success style
+          )}
+
           <form onSubmit={handleSubmit} className={styles.loginForm}>
               <div className={styles.formGroup}>
                   <label htmlFor="email">Email:</label>
@@ -62,6 +81,12 @@ function LoginPage() {
                   {isLoading ? 'Logging in...' : 'Login'}
               </button>
           </form>
+
+          {/* --- ADD Sign Up Link --- */}
+          <p className={styles.registerLink}>
+            Don't have an account? <Link to="/register">Sign Up</Link>
+          </p>
+          {/* --- END Sign Up Link --- */}
       </div>
   );
 }

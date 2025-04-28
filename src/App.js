@@ -21,6 +21,7 @@ import ViewNotePage from './pages/ViewNotePage';
 import EditNotePage from './pages/EditNotePage';
 import EditClientPage from './pages/EditClientPage';
 import SettingsPage from './pages/SettingsPage'; // <-- Import SettingsPage
+import RegisterPage from './pages/RegisterPage';
 
 // Components
 import ProtectedRoute from './components/ProtectedRoute';
@@ -54,6 +55,12 @@ function AppContent() {
               path="/login"
               element={!auth.isAuthenticated ? <LoginPage /> : <Navigate to="/" replace />}
             />
+            {/* --- ADD REGISTER ROUTE --- */}
+            <Route
+                path="/register"
+                element={!auth.isAuthenticated ? <RegisterPage /> : <Navigate to="/" replace />} // Also redirect if logged in
+            />
+            {/* --- END REGISTER ROUTE --- */}
 
             {/* --- Protected Routes --- */}
             <Route element={<ProtectedRoute />}>

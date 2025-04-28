@@ -56,7 +56,7 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
 
 // --- API Routes ---
-// Public auth route
+// Public auth route (includes /register and /login)
 app.use('/api/auth', authRoutes); // Path '/api/auth' looks correct
 
 // Apply authentication middleware TO PROTECTED ROUTES ONLY

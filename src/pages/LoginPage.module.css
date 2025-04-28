@@ -100,3 +100,28 @@
   .forgotPassword a:hover {
     text-decoration: underline;
   }
+
+  .successMessage { /* Style for registration success */
+    color: #155724; /* Dark green text */
+    background-color: #d4edda; /* Light green background */
+    border: 1px solid #c3e6cb;
+    border-radius: 4px;
+    padding: 10px 15px;
+    margin-bottom: 20px; /* Space below message */
+    text-align: center;
+    font-size: 0.9em;
+}
+
+.registerLink { /* Style for link to register page */
+  text-align: center;
+  margin-top: 20px;
+  font-size: 0.9em;
+}
+.registerLink a {
+  color: #007bff;
+  font-weight: 500;
+  text-decoration: none;
+}
+.registerLink a:hover {
+  text-decoration: underline;
+}
