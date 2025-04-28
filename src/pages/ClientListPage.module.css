@@ -1,13 +1,11 @@
 /* src/pages/ClientListPage.module.css */
 
-/* Container for the whole page */
 .clientListPageContainer {
   display: flex;
   flex-direction: column;
-  /* Calculate height: 100vh MINUS BottomNav height MINUS BottomNav safe area */
-  /* Adjust 60px if your BottomNav height is different */
-  height: calc(100vh - 60px - env(safe-area-inset-bottom));
-  overflow: hidden; /* Prevent container itself from scrolling */
+  height: calc(100vh - 60px - env(safe-area-inset-bottom)); /* Adjust 60px if nav height differs */
+  overflow: hidden;
+  background-color: #ffffff; /* Ensure background */
 }
 
 /* Header Styles */
@@ -15,154 +13,203 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 20px;
-  flex-shrink: 0; /* Prevent header from shrinking */
-  /* Optional: Add background if needed when list scrolls under */
-  /* background-color: #ffffff; */
-  /* border-bottom: 1px solid #eee; */
+  padding: 10px 16px; /* iOS-like padding */
+  flex-shrink: 0;
+  border-bottom: 0.5px solid #d1d1d6; /* iOS subtle separator */
+  background-color: #f8f9fa; /* Light background for header area */
 }
-
 .pageTitle {
-  font-size: 2.2rem; /* Large like WhatsApp */
+  font-size: 2rem; /* Slightly smaller large title */
   font-weight: 700;
-  margin: 0; /* Remove default margins */
-  color: #1c1e21; /* Darker text color */
+  margin: 0;
+  color: #000000; /* Black title */
 }
-
 .addButtonTopRight {
-  background-color: #007bff; /* iOS blue or WhatsApp green #25D366 */
+  background-color: #007aff; /* iOS Blue */
   color: white;
   border: none;
-  width: 36px; /* Adjust size */
-  height: 36px; /* Adjust size */
-  border-radius: 50%; /* Circular */
-  font-size: 1.8rem; /* Size of '+' */
-  font-weight: 300; /* Lighter weight for '+' */
-  line-height: 34px; /* Center '+' vertically */
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 1.8rem;
+  font-weight: 300;
+  line-height: 30px; /* Adjust for vertical centering */
   text-align: center;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  padding: 0; /* Remove padding if using line-height */
+  padding: 0;
 }
 .addButtonTopRight:hover {
-  background-color: #0056b3; /* Darker blue or green #128C7E */
+  background-color: #0056b3;
 }
 
 /* Search Bar Styles */
 .searchContainer {
-  padding: 5px 15px 10px 15px;
-  flex-shrink: 0; /* Prevent search from shrinking */
-   /* Optional: Add background if needed */
-  /* background-color: #ffffff; */
-  /* border-bottom: 1px solid #eee; */
+  padding: 8px 16px; /* iOS-like padding */
+  background-color: #f8f9fa; /* Match header background */
+  border-bottom: 0.5px solid #d1d1d6; /* Separator below search */
+  flex-shrink: 0;
+  position: relative; /* For positioning clear button */
 }
-
 .searchInput {
   width: 100%;
-  padding: 8px 15px 8px 35px; /* Left padding for icon */
+  padding: 8px 12px 8px 32px; /* Adjusted padding, left for icon */
   font-size: 1rem;
-  border-radius: 10px; /* Less rounded than full pill */
-  border: none; /* Remove border */
-  background-color: #f0f2f5; /* Light grey background like WhatsApp */
+  border-radius: 10px;
+  border: none;
+  background-color: #eef0f2; /* Slightly different grey */
   color: #1c1e21;
   box-sizing: border-box;
-  /* Placeholder Icon (using background image) */
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%238e8e93" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>'); /* Grey search icon SVG */
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%238e8e93" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>');
   background-repeat: no-repeat;
-  background-position: 10px center; /* Position icon left */
-  background-size: 16px 16px; /* Icon size */
+  background-position: 10px center;
+  background-size: 16px 16px;
+  -webkit-appearance: none; /* Remove iOS default styling */
 }
 .searchInput::placeholder {
-  color: #8e8e93; /* Grey placeholder text */
-  /* text-align: center; /* Centering placeholder can be tricky */
+  color: #8e8e93;
 }
 .searchInput:focus {
-  outline: none; /* Remove focus outline */
-  background-color: #e8eaed; /* Slightly darker on focus */
+  outline: none;
+  background-color: #e8eaed;
 }
-
+/* Clear button inside search */
+.clearSearchButton {
+  position: absolute;
+  right: 20px; /* Position inside */
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #a8a8ac; /* Grey circle */
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 0.8rem;
+  line-height: 18px; /* Center 'X' */
+  text-align: center;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+.clearSearchButton:hover {
+  opacity: 1;
+}
 
 /* Success Message Style */
 .successMessage {
-  /* Keep existing styles */
-  /* It will remain fixed above the scroll area */
-   margin: 5px 15px 10px 15px; /* Ensure it has margin */
-   flex-shrink: 0; /* Prevent shrinking */
+  background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;
+  padding: 10px 16px; margin: 10px 16px 0 16px; border-radius: 6px;
+  text-align: center; font-size: 0.9em; flex-shrink: 0;
+}
+/* Inline Error Style (can reuse successMessage background/border maybe?) */
+.inlineError {
+  background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;
+  padding: 10px 16px; margin: 10px 16px 0 16px; border-radius: 6px;
+  text-align: center; font-size: 0.9em; flex-shrink: 0;
 }
 
-/* --- Scrollable Area --- */
+/* Scrollable List Area */
 .listScrollArea {
-  flex-grow: 1; /* Takes up remaining vertical space */
-  overflow-y: auto; /* Enable vertical scrolling ONLY for this div */
-  overflow-x: hidden; /* Prevent horizontal scroll */
-  /* Add padding inside the scroll area */
-  padding: 0 0px 0px 0px; /* Only bottom padding needed maybe? Adjust */
-  position: relative; /* Needed if spinner is positioned absolutely inside */
-   -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  flex-grow: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  -webkit-overflow-scrolling: touch;
+  background-color: #ffffff; /* Ensure list background is white */
 }
 
 /* Client List Styles */
 .clientList {
-  list-style: none;
-  padding: 0 0 20px 0; /* Add bottom padding inside scroll */
-  margin: 0; /* Reset margin */
-  /* No height or overflow needed here */
+list-style: none;
+padding: 0;
+margin: 0;
 }
 .clientListItem {
-/* Remove border, use separator line */
-margin: 0; /* Remove margin */
+margin: 0;
 transition: background-color 0.2s ease;
 }
 .clientListItem:hover {
-background-color: #f0f2f5; /* Subtle hover */
+background-color: #f0f2f5;
 }
-
 .clientLink {
   display: flex;
-  align-items: center; /* Vertically center avatar and text */
-  padding: 10px 20px; /* Adjust padding */
+  align-items: center;
+  padding: 10px 16px; /* Consistent padding */
   text-decoration: none;
   color: inherit;
-  gap: 15px; /* Space between avatar and text */
-  /* Add separator line */
-  border-bottom: 1px solid #f0f2f5; /* Light separator */
+  gap: 12px; /* Adjusted gap */
+  border-bottom: 0.5px solid #e5e7e8; /* iOS subtle separator */
 }
 .clientListItem:last-child .clientLink {
-  border-bottom: none; /* No border for last item */
+  border-bottom: none;
 }
-
-/* Container for Name and Last Contact */
+/* Avatar is handled by component */
 .clientInfo {
   display: flex;
-  flex-direction: column; /* Stack name and subtext */
-  flex-grow: 1; /* Take remaining space */
-  overflow: hidden; /* Prevent long text overflow */
+  flex-direction: column;
+  flex-grow: 1;
+  overflow: hidden;
+  padding-right: 10px; /* Space before accessory */
 }
-
 .clientName {
-font-weight: 500; /* Medium weight */
-font-size: 1.1rem;
-color: #1c1e21; /* Dark text */
-white-space: nowrap; /* Prevent name wrapping */
-overflow: hidden;
-text-overflow: ellipsis; /* Add ellipsis for long names */
-}
-
-.lastContact {
-font-size: 0.9em; /* Smaller subtext */
-color: #657786; /* Grey subtext color */
+font-weight: 500;
+font-size: 1.05rem; /* Standard iOS list item size */
+color: #000000; /* Black */
 white-space: nowrap;
 overflow: hidden;
 text-overflow: ellipsis;
-margin-top: 2px; /* Small space below name */
+}
+.lastContact {
+font-size: 0.85rem;
+color: #8e8e93; /* iOS secondary text grey */
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+margin-top: 2px;
+}
+/* Accessory Chevron */
+.listItemAccessory {
+  font-size: 1.2rem;
+  color: #c7c7cc; /* iOS chevron color */
+  font-weight: 300;
+  flex-shrink: 0;
 }
 
-/* Style for filter message */
-.noResults {
+/* Empty State Styles */
+.emptyStateContainer {
   text-align: center;
-  color: #666;
-  margin-top: 30px;
-  padding: 20px;
-  font-style: italic;
-  padding: 40px 20px; /* Add padding if it's inside scroll area */
+  padding: 60px 20px;
+  margin-top: 20px;
+  color: #8e8e93; /* Softer grey */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+.emptyIcon {
+  font-size: 3rem;
+  margin-bottom: 15px;
+  opacity: 0.6;
+}
+.emptyStateContainer p {
+  font-size: 1rem; /* Regular size */
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+.emptyStateButton {
+  padding: 10px 18px;
+  background-color: #007aff; /* iOS Blue */
+  color: white;
+  border: none;
+  border-radius: 8px; /* iOS button radius */
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.emptyStateButton:hover {
+  background-color: #0056b3;
 }

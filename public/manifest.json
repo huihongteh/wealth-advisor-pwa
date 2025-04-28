@@ -1,31 +1,44 @@
 {
-  "short_name": "Advisor Notes", 
-  "name": "Wealth Advisor Client Notes", 
-  "description": "A simple app for Wealth Advisors to log client meeting notes and action items.", 
+  "short_name": "AdvisorNotes",
+  "name": "Wealth Advisor Notes", 
+  "description": "Log client meeting notes and track action items.",
   "icons": [
+
     {
-      "src": "favicon.ico", 
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    },
-    {
-      "src": "logo192.png", 
+      "src": "icons/icon-192x192.png",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "any" 
     },
     {
-      "src": "logo512.png", 
+      "src": "icons/icon-512x512.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any"
+    },
+    {
+       "src": "icons/icon-144x144.png", 
+       "type": "image/png",
+       "sizes": "144x144",
+       "purpose": "any"
+    },
+     {
+       "src": "icons/icon-96x96.png", 
+       "type": "image/png",
+       "sizes": "96x96",
+       "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512x512.png", 
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable" 
     }
   ],
   "start_url": ".", 
-  "display": "standalone",
+  "display": "standalone", 
   "scope": "/", 
-  "theme_color": "#007bff", 
+  "theme_color": "#007aff",
   "background_color": "#ffffff", 
   "orientation": "portrait" 
-
 }

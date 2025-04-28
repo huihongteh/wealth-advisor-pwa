@@ -11,7 +11,7 @@ import Spinner from '../components/Spinner';
 import ActionSheet from '../components/ActionSheet';
 import BackButton from '../components/BackButton';
 import MoreOptionsButton from '../components/MoreOptionsButton';
-import AvatarPlaceholder from '../components/AvatarPlaceholder';
+import AvatarPlaceholder from '../components/AvatarPlaceholder'; // Make sure this is imported
 import apiClient from '../utils/apiClient';
 import { useAuth } from '../context/AuthContext';
 
@@ -38,11 +38,14 @@ function ClientDetailPage() {
   useEffect(() => {
     let isMounted = true;
     const fetchClientData = async () => {
-        setIsLoading(true); setError(''); setActionError(''); setSuccessMessage(''); // Clear states
+        // Only set loading true if not already loading
+        if(isMounted && !isLoading) setIsLoading(true);
+        // Clear messages/errors on new fetch/refresh
+        setError(''); setActionError(''); setSuccessMessage('');
         console.log(`ClientDetailPage: Fetching data for client ID: ${clientId} (Refresh Key: ${refreshKey})`);
 
         try {
-            const data = await apiClient(`/clients/${clientId}`); // Fetches client + notes array
+            const data = await apiClient(`/clients/${clientId}`);
             if (isMounted) {
                 setClientData(data);
                 console.log("ClientDetailPage: Data fetched successfully", data);
@@ -51,10 +54,7 @@ function ClientDetailPage() {
             console.error("ClientDetailPage: Failed to fetch client data:", err);
              if (isMounted) {
                 setError(err.message || 'Failed to load client details.');
-                 // Handle auth errors
-                if (err.status === 401 || err.status === 403) {
-                    setTimeout(() => auth.logout(), 1500);
-                }
+                if (err.status === 401 || err.status === 403) { setTimeout(() => auth.logout(), 1500); }
              }
         } finally {
              if (isMounted) setIsLoading(false);
@@ -72,10 +72,9 @@ function ClientDetailPage() {
   useEffect(() => {
     if (location.state?.message) {
       setSuccessMessage(location.state.message);
-      // Trigger re-fetch if refresh flag is set
       if (location.state?.refresh) {
           console.log("ClientDetailPage: Refresh triggered by location state.");
-          setRefreshKey(prevKey => prevKey + 1); // Increment key to trigger fetch effect
+          setRefreshKey(prevKey => prevKey + 1);
       }
       const timer = setTimeout(() => setSuccessMessage(''), 5000);
       window.history.replaceState({}, document.title); // Clear state from history
@@ -88,7 +87,6 @@ function ClientDetailPage() {
   const handleAddNote = () => navigate(`/client/${clientId}/add-note`);
 
   const handleDeleteClient = async () => {
-    // Use clientData directly from state now
     if (!clientData || !window.confirm(`Are you sure you want to delete client ${clientData.name}? This will also delete all associated meeting notes and cannot be undone.`)) {
       handleCloseActionSheet(); return;
     }
@@ -97,16 +95,7 @@ function ClientDetailPage() {
     try {
         await apiClient(`/clients/${clientId}`, 'DELETE');
         console.log('ClientDetailPage: Client deleted successfully via API');
-        // Navigate back to client list WITH refresh flag and message
-        navigate(
-            '/',
-            {
-                state: {
-                    refresh: true, // <-- Set refresh flag for ClientListPage
-                    message: `Client ${clientData.name} deleted successfully.`
-                }
-            }
-        );
+        navigate( '/', { state: { refresh: true, message: `Client ${clientData.name} deleted successfully.` } } );
     } catch (err) {
         console.error('ClientDetailPage: Failed to delete client:', err);
         setActionError(err.message || 'Failed to delete client. Please try again.');
@@ -131,7 +120,7 @@ function ClientDetailPage() {
 
   // --- Render Logic ---
   if (isLoading) {
-    return (
+    return ( // Wrap spinner for consistent layout
         <div className={styles.clientDetailPageContainer}>
             <div className={styles.fixedContent}> <BackButton to="/" label="Clients" /> </div>
             <div className={styles.scrollContentCentered}> <Spinner /> </div>
@@ -148,12 +137,14 @@ function ClientDetailPage() {
        </div>
      );
   }
-  if (!clientData && !isLoading) { // Should be caught by error, but fallback
+  // Use clientData check AFTER loading/error checks
+  if (!clientData) {
+    // This case handles when loading is finished but data is still null (e.g., 404 not caught as specific error)
     return (
        <div className={`${styles.clientDetailPageContainer} ${styles.errorContainer}`}>
            <div className={styles.fixedContent}> <BackButton to="/" label="Clients" /> </div>
             <div className={styles.scrollContentCentered}>
-                <div className={styles.error}> <p>Client data could not be loaded.</p> </div>
+                <div className={styles.error}> <p>Client data could not be found or loaded.</p> </div>
             </div>
        </div>
     );
@@ -169,7 +160,7 @@ function ClientDetailPage() {
             {successMessage && (<div className={styles.successMessage}>{successMessage}</div>)}
             {actionError && (<div className={styles.inlineError}>{actionError}</div>)}
 
-            {/* Client Header - Use clientData */}
+            {/* Client Header */}
             <div className={styles.clientHeader}>
                 <div className={styles.avatarContainer}>
                     <AvatarPlaceholder name={clientData.name} size={60} />
@@ -190,7 +181,7 @@ function ClientDetailPage() {
                 </div>
             </div>
 
-            {/* Add Note Button - Use clientData */}
+            {/* Add Note Button */}
             <div className={styles.actions}>
                 <button onClick={handleAddNote} className={styles.addNoteButton}>
                     + Add New Meeting Note for {clientData.name}
@@ -218,7 +209,13 @@ function ClientDetailPage() {
                 ))}
             </ul>
             ) : (
-                 <p className={styles.noResults}>No meeting notes recorded yet.</p>
+                 // Updated Empty State for notes
+                 <div className={styles.emptyStateContainerNotes}>
+                     <span className={styles.emptyIcon}>📝</span>
+                     <p>No meeting notes recorded yet for {clientData?.name || 'this client'}.</p>
+                     {/* Optional Button Here: */}
+                     {/* <button onClick={handleAddNote} className={styles.emptyStateButton}>Add First Note</button> */}
+                 </div>
             )}
         </div>
         {/* End Scrollable Notes Area */}
