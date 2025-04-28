@@ -2,7 +2,9 @@
 
 // Get base URL. Use environment variable for deployed version.
 // The REACT_APP_ prefix is required by Create React App.
+console.log('[apiClient] Reading REACT_APP_API_BASE_URL:', process.env.REACT_APP_API_BASE_URL);
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001/api';
+console.log('[apiClient] API_BASE_URL determined as:', API_BASE_URL);
 
 const getToken = () => sessionStorage.getItem('pwa-auth-token'); // Or import from context if preferred
 
@@ -28,9 +30,9 @@ const apiClient = async (endpoint, method = 'GET', body = null) => {
 
     try {
         const fullUrl = `${API_BASE_URL}${endpoint}`;
-        console.log(`API Request: ${method} ${fullUrl}`); // Log the full URL being requested
+        console.log(`[apiClient] Attempting fetch: ${method} ${fullUrl}`);
 
-        const response = await fetch(fullUrl, config); // <-- Use fullUrl here
+        const response = await fetch(fullUrl, config);
 
         // Handle No Content response (e.g., for DELETE)
         if (response.status === 204) {
