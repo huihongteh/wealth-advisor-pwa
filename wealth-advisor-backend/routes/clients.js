@@ -72,9 +72,9 @@ router.post('/', async (req, res) => {
   try {
     // Include advisor_id in the INSERT
     const result = await db.query(
-        'INSERT INTO clients (name, email, phone, advisor_id) VALUES ($1, $2, $3, $4) RETURNING id, name, email, phone',
-        [name.trim(), /*...*/, /*...*/, advisorId] // <-- Add advisorId
-      );
+      'INSERT INTO clients (name, email, phone, advisor_id) VALUES ($1, $2, $3, $4) RETURNING id, name, email, phone',
+      [name.trim(), email ? email.trim() : null, phone ? phone.trim() : null, advisorId] // <-- Ensure these parameters ($2, $3) match the query order
+    );
     res.status(201).json(result.rows[0]); // Return the newly created client data
   } catch (err) {
     console.error('Error creating client:', err.stack);
