@@ -111,13 +111,106 @@ function ViewNotePage() {
     }
   };
 
+  // --- Combined Share Handler ---
+  const handleShare = async () => {
+    console.log("Attempting to share note...");
+    if (!note) {
+        alert("Could not get note data to share."); return;
+    }
+
+    // --- Refined Message Formatting ---
+    // Use bullet points (like '*') or simple lists for clarity.
+    // WhatsApp uses _italic_ and *bold* (sometimes ~strikethrough~, ```monospace```)
+
+    const clientDisplayName = clientName || 'Valued Client'; // Use name or fallback
+    const appName = "AdvisorNotes System"; // Or your chosen app name
+
+    let messageParts = [
+        `*Meeting Follow-Up (${note.date})*`, // Clear Title with Date
+        `Hi ${clientDisplayName},`, // Personalized Greeting
+        `Here's a brief summary of our discussion today:`,
+        `\n*Key Topics/Summary:*`, // Section Header
+        // Ensure summary text exists, trim, and maybe add bullet point if desired
+        `${note.summary?.trim() ? `- ${note.summary.trim()}` : '- _No specific summary points recorded._'}`,
+    ];
+
+    const nextStepsText = note.nextSteps?.trim();
+    if (nextStepsText) {
+        messageParts.push(`\n*Action Items/Next Steps:*`);
+         // Add bullet point to next steps
+        messageParts.push(`- ${nextStepsText}`);
+    } else {
+         messageParts.push(`\n*Action Items/Next Steps:*`);
+         messageParts.push(`- _No specific action items recorded._`);
+    }
+
+    // Add footer
+    messageParts.push(`\n_(Sent via ${appName})_`); // Footer with app name in italics
+
+    // Join parts with double newline for paragraph spacing
+    const message = messageParts.join('\n\n');
+    // --- End Refined Formatting ---
+
+
+    console.log("Formatted Message:", message); // Log before sharing/encoding
+
+    // Try Native Web Share API first
+    if (navigator.share) {
+        console.log("Using Native Web Share API");
+        try {
+            const shareData = {
+                // Title isn't always used prominently, but good to have
+                title: `Meeting Follow-Up ${note.date}`,
+                text: message,
+            };
+            await navigator.share(shareData);
+            console.log('Content shared successfully via native share');
+            // Don't close sheet here, native share handles UI dismissal
+            return;
+        } catch (err) {
+             if (err.name === 'AbortError') { console.log('User cancelled native share.'); }
+             else { console.error('Error using Native Web Share API:', err); }
+             handleCloseActionSheet(); // Close sheet on error/cancel
+             return;
+        }
+    } else {
+         // Fallback to WhatsApp URL Method
+        console.log("Native Web Share not supported, falling back to WhatsApp URL");
+        try {
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
+            console.log("Generated WhatsApp URL (Fallback):", whatsappUrl);
+            window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+        } catch(e) {
+             console.error("Error opening WhatsApp link (Fallback):", e);
+             alert("Could not open WhatsApp link.");
+        }
+         handleCloseActionSheet(); // Close sheet after triggering fallback
+    }
+};
+// --- End Combined Share Handler ---
+
   const handleOpenActionSheet = () => setIsActionSheetOpen(true);
   const handleCloseActionSheet = () => setIsActionSheetOpen(false);
 
   const sheetActions = [
-      { label: 'Edit Note', onClick: () => { handleCloseActionSheet(); handleEdit(); }, disabled: isDeleting },
-      { label: 'Delete Note', onClick: handleDeleteNote, destructive: true, disabled: isDeleting },
-    ];
+    {
+        label: 'Edit Note',
+        onClick: () => { handleCloseActionSheet(); handleEdit(); },
+        disabled: isDeleting
+    },
+    {
+      label: 'Share Note', // Changed label to be more generic
+      onClick: handleShare, // Call the combined handler
+      disabled: !note || isDeleting
+  },
+    {
+        label: 'Delete Note',
+        onClick: handleDeleteNote,
+        destructive: true,
+        disabled: isDeleting
+    },
+];
 
   // --- Render Logic ---
   if (isLoading) {

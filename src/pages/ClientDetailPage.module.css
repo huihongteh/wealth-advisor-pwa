@@ -26,7 +26,6 @@
       padding: 20px;
       overflow-y: auto; /* Allow scroll if error message is huge */
   }
-  .errorContainer {} /* Can likely be removed */
   
   /* Error and Success Message Styling */
   .error { /* Error block style */
