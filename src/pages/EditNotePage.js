@@ -110,9 +110,13 @@ function EditNotePage() {
 
         // Navigate back to the View Note page after successful save
         navigate(
-            `/client/${clientId}/note/${noteId}`, // Back to view page
-            { state: { message: 'Note updated successfully.' } } // Pass success message
-        );
+          `/client/${clientId}/note/${noteId}`, // Navigate back to VIEW note first
+          {
+              replace: true, // Optional
+              // Pass message to View page, View page needs refresh handling too
+              state: { refresh: true, message: 'Note updated successfully.' }
+          }
+      );
 
     } catch (apiError) {
         // --- Handle API Error ---

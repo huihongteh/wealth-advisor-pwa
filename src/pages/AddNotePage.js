@@ -95,7 +95,13 @@ function AddNotePage() {
         // No need for setIsSaving(false) - navigating away
         // Navigate back to the client detail page after successful save
         // Pass success message? Optional, maybe just seeing the note is enough.
-        navigate(`/client/${clientId}`);
+        navigate(
+          `/client/${clientId}`,
+          {
+              replace: true, // Optional
+              state: { refresh: true, message: 'Note added successfully.' } // Add refresh flag
+          }
+      );
 
     } catch (apiError) {
         // --- Handle API Error ---
