@@ -64,7 +64,6 @@
   background-repeat: no-repeat;
   background-position: 10px center;
   background-size: 16px 16px;
-  -webkit-appearance: none; /* Remove iOS default styling */
 }
 .searchInput::placeholder {
   color: #8e8e93;
@@ -162,12 +161,21 @@ overflow: hidden;
 text-overflow: ellipsis;
 }
 .lastContact {
-font-size: 0.85rem;
-color: #8e8e93; /* iOS secondary text grey */
-white-space: nowrap;
-overflow: hidden;
-text-overflow: ellipsis;
-margin-top: 2px;
+  font-size: 0.85rem;
+  color: #657786; /* Standard secondary text */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+.lastContactMuted { /* Optional: Style for when no date exists */
+  font-size: 0.85rem;
+  color: #adb5bd; /* Lighter grey */
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
 }
 /* Accessory Chevron */
 .listItemAccessory {

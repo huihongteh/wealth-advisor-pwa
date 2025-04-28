@@ -10,9 +10,13 @@ router.get('/', async (req, res) => {
   try {
     // Filter by advisor_id
     const result = await db.query(
-        'SELECT id, name, email, phone FROM clients WHERE advisor_id = $1 ORDER BY name ASC',
-        [advisorId] // <-- Use advisorId in query
-    );
+      `SELECT
+          id, name, email, phone,
+          to_char(last_contacted_at, 'YYYY-MM-DD') as "lastContact" -- Format date
+       FROM clients
+       WHERE advisor_id = $1 ORDER BY name ASC`,
+      [advisorId]
+  );
     res.json(result.rows);
   } catch (err) {
     console.error('Error fetching clients:', err.stack);
@@ -27,8 +31,11 @@ router.get('/:id', async (req, res) => {
   try {
    // Check if client exists AND belongs to the logged-in advisor
    const clientResult = await db.query(
-    'SELECT id, name, email, phone, created_at, updated_at FROM clients WHERE id = $1 AND advisor_id = $2',
-    [id, advisorId] // <-- Use both IDs
+    `SELECT
+        id, name, email, phone, created_at as "createdAt", updated_at as "updatedAt",
+        to_char(last_contacted_at, 'YYYY-MM-DD') as "lastContact" -- Format date
+     FROM clients WHERE id = $1 AND advisor_id = $2`,
+    [id, advisorId]
 );
 
     if (clientResult.rows.length === 0) {

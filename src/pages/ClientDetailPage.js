@@ -170,6 +170,15 @@ function ClientDetailPage() {
                     <div className={styles.contactInfo}>
                         {clientData.email && <span>Email: {clientData.email}</span>}
                         {clientData.phone && <span>Phone: {clientData.phone}</span>}
+                        {clientData.lastContact ? (
+                            <span className={styles.lastContactHeader}>
+                                Last Contact: {clientData.lastContact}
+                            </span>
+                        ) : (
+                            <span className={styles.lastContactHeaderMuted}>
+                                No contact recorded
+                            </span>
+                        )}
                     </div>
                 </div>
                 <div className={styles.headerActions}>

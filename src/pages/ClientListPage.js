@@ -116,9 +116,14 @@ function ClientListPage() {
                             <AvatarPlaceholder name={client?.name || '?'} size={48} /> {/* Slightly smaller avatar */}
                             <div className={styles.clientInfo}>
                                 <span className={styles.clientName}>{client.name || 'Unnamed Client'}</span>
-                                {client.lastContact &&
+                                {/* --- DISPLAY lastContact --- */}
+                                {/* Check if client.lastContact exists and has a value */}
+                                {client.lastContact ? (
                                     <span className={styles.lastContact}>Last Contact: {client.lastContact}</span>
-                                }
+                                ) : (
+                                    <span className={styles.lastContactMuted}>No contact recorded</span> // Optional different style
+                                )}
+                                {/* --- END DISPLAY --- */}
                             </div>
                             {/* Chevron accessory */}
                             <span className={styles.listItemAccessory}>›</span>

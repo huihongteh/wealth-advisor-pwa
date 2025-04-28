@@ -69,8 +69,28 @@
   .headerContent h2 {
     margin-top: 0; margin-bottom: 3px; font-size: 1.5rem; font-weight: 600; color: #000000;
   }
-  .contactInfo { font-size: 0.9rem; color: #8e8e93; /* iOS secondary grey */}
-  .contactInfo span { margin-right: 10px; display: inline-block; margin-top: 4px; }
+  .contactInfo {
+    font-size: 0.9rem;
+    color: #8e8e93; /* iOS secondary grey */
+    /* Optional: Use flex for better alignment if items wrap */
+     display: flex;
+     flex-wrap: wrap;
+     gap: 5px 15px; /* Row gap, Column gap */
+     margin-top: 5px; /* Space below name */
+  }
+  
+  .contactInfo span { /* Base style for all items */
+    /* margin-right: 10px; Remove margin if using gap */
+    /* display: inline-block; Handled by flex */
+     white-space: nowrap; /* Prevent wrapping within an item */
+  }
+
+.lastContactHeaderMuted {
+    /* Inherits size etc. */
+    color: #adb5bd; /* Lighter grey */
+    font-style: italic;
+}
+
   .headerActions { flex-shrink: 0; }
   
   /* Add Note Button Styles */
